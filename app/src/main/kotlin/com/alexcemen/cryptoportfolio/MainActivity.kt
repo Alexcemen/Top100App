@@ -14,6 +14,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.alexcemen.cryptoportfolio.ui.navigation.PortfolioScreen
 import com.alexcemen.cryptoportfolio.ui.navigation.SettingsScreen
+import com.alexcemen.cryptoportfolio.ui.screen.portfolio.composable.PortfolioScreenContent
 import com.alexcemen.cryptoportfolio.ui.screen.settings.composable.SettingsScreenContent
 import com.alexcemen.cryptoportfolio.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,7 +38,7 @@ class MainActivity : ComponentActivity() {
                     ),
                     entryProvider = entryProvider {
                         entry<PortfolioScreen> {
-                            // PortfolioScreenContent() — added in Task 18
+                            PortfolioScreenContent()
                         }
                         entry<SettingsScreen> {
                             SettingsScreenContent()

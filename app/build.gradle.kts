@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.alexcemen.cryptoportfolio"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.alexcemen.cryptoportfolio"
         minSdk = 26

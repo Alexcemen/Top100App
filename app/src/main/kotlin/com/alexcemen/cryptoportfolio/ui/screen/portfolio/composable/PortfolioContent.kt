@@ -21,11 +21,10 @@ import java.util.Locale
 fun PortfolioContent(
     uiState: PortfolioStore.UiState,
     onEvent: (PortfolioStore.Event) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.US) }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             topBar = {
                 TopAppBar(

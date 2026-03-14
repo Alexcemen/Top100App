@@ -8,6 +8,12 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
 
+fun signMexcQuery(query: String, secret: String): String {
+    val mac = Mac.getInstance("HmacSHA256")
+    mac.init(SecretKeySpec(secret.toByteArray(), "HmacSHA256"))
+    return mac.doFinal(query.toByteArray()).joinToString("") { "%02x".format(it) }
+}
+
 class MexcSigningInterceptor @Inject constructor(
     private val settingsRepository: SettingsRepository
 ) : Interceptor {
@@ -21,11 +27,5 @@ class MexcSigningInterceptor @Inject constructor(
             .build()
 
         return chain.proceed(request)
-    }
-
-    fun sign(queryString: String, secret: String): String {
-        val mac = Mac.getInstance("HmacSHA256")
-        mac.init(SecretKeySpec(secret.toByteArray(), "HmacSHA256"))
-        return mac.doFinal(queryString.toByteArray()).joinToString("") { "%02x".format(it) }
     }
 }

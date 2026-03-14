@@ -53,14 +53,15 @@ class SellUseCaseTest {
             ordersPlaced.add(order)
             return Unit
         }
+
     }
 
     @Test
     fun missingKeys_returnsFailure() = runTest {
         val useCase = SellUseCase(
             checkSettings = CheckSettingsUseCase(emptySettingsRepo),
-            settingsRepo = emptySettingsRepo,
-            portfolioRepo = fakePortfolioRepo,
+            settingsRepository = emptySettingsRepo,
+            portfolioRepository = fakePortfolioRepo,
             mexcService = fakeMexcService,
         )
         assertTrue(useCase(500.0).isFailure)
@@ -70,8 +71,8 @@ class SellUseCaseTest {
     fun zeroAmount_returnsFailure() = runTest {
         val useCase = SellUseCase(
             checkSettings = CheckSettingsUseCase(validSettingsRepo),
-            settingsRepo = validSettingsRepo,
-            portfolioRepo = fakePortfolioRepo,
+            settingsRepository = validSettingsRepo,
+            portfolioRepository = fakePortfolioRepo,
             mexcService = fakeMexcService,
         )
         assertTrue(useCase(0.0).isFailure)
@@ -81,8 +82,8 @@ class SellUseCaseTest {
     fun happyPath_placesProportionalOrders() = runTest {
         val useCase = SellUseCase(
             checkSettings = CheckSettingsUseCase(validSettingsRepo),
-            settingsRepo = validSettingsRepo,
-            portfolioRepo = fakePortfolioRepo,
+            settingsRepository = validSettingsRepo,
+            portfolioRepository = fakePortfolioRepo,
             mexcService = fakeMexcService,
         )
         val result = useCase(900.0)  // 10% of $9000

@@ -1,26 +1,26 @@
 package com.alexcemen.cryptoportfolio.domain.usecase
 
+import com.alexcemen.cryptoportfolio.data.network.ORDER_TYPE_MARKET
+import com.alexcemen.cryptoportfolio.data.network.QUOTE_ASSET
 import com.alexcemen.cryptoportfolio.data.network.MexcApiService
 import com.alexcemen.cryptoportfolio.data.network.OrderSide
+import com.alexcemen.cryptoportfolio.data.network.signMexcQuery
 import com.alexcemen.cryptoportfolio.domain.repository.PortfolioRepository
 import com.alexcemen.cryptoportfolio.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
 
 class SellUseCase @Inject constructor(
     private val checkSettings: CheckSettingsUseCase,
-    private val settingsRepo: SettingsRepository,
-    private val portfolioRepo: PortfolioRepository,
+    private val settingsRepository: SettingsRepository,
+    private val portfolioRepository: PortfolioRepository,
     private val mexcService: MexcApiService,
 ) {
     suspend operator fun invoke(usdtAmount: Double): Result<Unit> = runCatching {
         if (!checkSettings()) throw IllegalStateException("API keys not configured")
-        if (usdtAmount <= 0) throw IllegalArgumentException("Amount must be > 0")
 
-        val settings = settingsRepo.getSettings()
-        val portfolio = portfolioRepo.getPortfolio().first()
+        val settings = settingsRepository.getSettings()
+        val portfolio = portfolioRepository.getPortfolio().first()
 
         if (portfolio.coins.isEmpty()) throw IllegalStateException("Portfolio is empty")
 
@@ -31,11 +31,14 @@ class SellUseCase @Inject constructor(
 
             val quoteQty = coinSellUsdt.toString()
             val timestamp = System.currentTimeMillis()
-            val signature = signQuery("symbol=${coin.symbol}USDT&side=SELL&type=MARKET&quoteOrderQty=$quoteQty&timestamp=$timestamp", settings.mexcApiSecret)
+            val signature = signMexcQuery(
+                query = "symbol=${coin.symbol}USDT&side=SELL&type=$ORDER_TYPE_MARKET&quoteOrderQty=$quoteQty&timestamp=$timestamp",
+                secret = settings.mexcApiSecret
+            )
             mexcService.placeOrder(
-                symbol = "${coin.symbol}USDT",
+                symbol = "${coin.symbol}$QUOTE_ASSET",
                 side = OrderSide.SELL,
-                type = "MARKET",
+                type = ORDER_TYPE_MARKET,
                 quoteOrderQty = quoteQty,
                 timestamp = timestamp,
                 signature = signature,
@@ -43,9 +46,4 @@ class SellUseCase @Inject constructor(
         }
     }
 
-    private fun signQuery(query: String, secret: String): String {
-        val mac = Mac.getInstance("HmacSHA256")
-        mac.init(SecretKeySpec(secret.toByteArray(), "HmacSHA256"))
-        return mac.doFinal(query.toByteArray()).joinToString("") { "%02x".format(it) }
-    }
 }

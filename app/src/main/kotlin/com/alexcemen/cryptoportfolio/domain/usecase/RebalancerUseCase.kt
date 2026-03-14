@@ -1,14 +1,15 @@
 package com.alexcemen.cryptoportfolio.domain.usecase
 
 import com.alexcemen.cryptoportfolio.data.network.CmcApiService
+import com.alexcemen.cryptoportfolio.data.network.ORDER_TYPE_MARKET
+import com.alexcemen.cryptoportfolio.data.network.QUOTE_ASSET
 import com.alexcemen.cryptoportfolio.data.network.MexcApiService
 import com.alexcemen.cryptoportfolio.data.network.OrderSide
+import com.alexcemen.cryptoportfolio.data.network.signMexcQuery
 import com.alexcemen.cryptoportfolio.domain.repository.SettingsRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
 
 class RebalancerUseCase @Inject constructor(
@@ -30,7 +31,7 @@ class RebalancerUseCase @Inject constructor(
             }
             val infoDeferred = async {
                 mexcService.getExchangeInfo().symbols
-                    .filter { it.quoteAsset == "USDT" }
+                    .filter { it.quoteAsset == QUOTE_ASSET }
                     .map { it.baseAsset }
                     .toSet()
             }
@@ -44,14 +45,14 @@ class RebalancerUseCase @Inject constructor(
         val prices = mexcService.getAllPrices()
             .associate { it.symbol to (it.price.toDoubleOrNull() ?: 0.0) }
         val timestamp = System.currentTimeMillis()
-        val signature = signQuery("timestamp=$timestamp", settings.mexcApiSecret)
+        val signature = signMexcQuery("timestamp=$timestamp", settings.mexcApiSecret)
         val account = mexcService.getAccount(timestamp, signature)
 
         // Build USDT-value map for held coins
         val balancesInUsdt = mutableMapOf<String, Double>()
-        for (balance in account.balances.filter { it.asset != "USDT" }) {
+        for (balance in account.balances.filter { it.asset != QUOTE_ASSET }) {
             val quantity = balance.free.toDoubleOrNull() ?: 0.0
-            val price = prices["${balance.asset}USDT"] ?: continue
+            val price = prices["${balance.asset}$QUOTE_ASSET"] ?: continue
             val value = (quantity * price).floor2()
             if (value > 1.0) balancesInUsdt[balance.asset] = value
         }
@@ -76,7 +77,7 @@ class RebalancerUseCase @Inject constructor(
             val averageValue = if (balancesInUsdt.isEmpty()) 0.0
             else balancesInUsdt.values.average().floor2()
             var remaining = account.balances
-                .find { it.asset == "USDT" }
+                .find { it.asset == QUOTE_ASSET }
                 ?.free?.toDoubleOrNull() ?: 0.0
             for (coin in missingList) {
                 val toBuy = minOf(averageValue, remaining).floor2()
@@ -121,15 +122,15 @@ class RebalancerUseCase @Inject constructor(
         runCatching {
             val timestamp = System.currentTimeMillis()
             val quoteQty = usdtAmount.toString()
-            val signature = signQuery(
-                query = "symbol=${coin}USDT&side=${side.name}&type=MARKET&quoteOrderQty=$quoteQty&timestamp=$timestamp",
+            val signature = signMexcQuery(
+                query = "symbol=${coin}USDT&side=${side.name}&type=$ORDER_TYPE_MARKET&quoteOrderQty=$quoteQty&timestamp=$timestamp",
                 secret = secret
             )
             Timber.d("REBALANCER placeOrder: symbol=${coin}USDT side=$side quoteOrderQty=$quoteQty")
             mexcService.placeOrder(
-                symbol = "${coin}USDT",
+                symbol = "${coin}$QUOTE_ASSET",
                 side = side,
-                type = "MARKET",
+                type = ORDER_TYPE_MARKET,
                 quoteOrderQty = quoteQty,
                 timestamp = timestamp,
                 signature = signature,
@@ -139,9 +140,4 @@ class RebalancerUseCase @Inject constructor(
         }
     }
 
-    private fun signQuery(query: String, secret: String): String {
-        val mac = Mac.getInstance("HmacSHA256")
-        mac.init(SecretKeySpec(secret.toByteArray(), "HmacSHA256"))
-        return mac.doFinal(query.toByteArray()).joinToString("") { "%02x".format(it) }
-    }
 }

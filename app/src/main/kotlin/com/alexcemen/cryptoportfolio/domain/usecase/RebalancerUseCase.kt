@@ -6,6 +6,8 @@ import com.alexcemen.cryptoportfolio.data.network.QUOTE_ASSET
 import com.alexcemen.cryptoportfolio.data.network.MexcApiService
 import com.alexcemen.cryptoportfolio.data.network.OrderSide
 import com.alexcemen.cryptoportfolio.data.network.signMexcQuery
+import com.alexcemen.cryptoportfolio.data.network.dto.MexcAccountResponse
+import com.alexcemen.cryptoportfolio.data.network.dto.MexcBalanceDto
 import com.alexcemen.cryptoportfolio.domain.repository.SettingsRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -24,101 +26,108 @@ class RebalancerUseCase @Inject constructor(
 
         val settings = settingsRepository.getSettings()
 
-        // Step 1: Fetch CMC top list and MEXC exchange info in parallel
-        val (topCmcList, tradableMexc) = coroutineScope {
-            val topDeferred = async {
-                cmcService.getListings(settings.cmcApiKey, settings.topCoinsLimit)
-                    .data.map { it.symbol }
-            }
-            val infoDeferred = async {
-                mexcService.getExchangeInfo().symbols
-                    .filter { it.quoteAsset == QUOTE_ASSET }
-                    .map { it.baseAsset }
-                    .toSet()
-            }
-            topDeferred.await() to infoDeferred.await()
-        }
-
-        // Step 2: Build available coins list
+        val (topCmcList, tradableMexc) = fetchMarketData(settings.cmcApiKey, settings.topCoinsLimit)
         val availableList = buildAvailableCoins(topCmcList, tradableMexc, settings.excludedCoins.toSet())
 
-        // Fetch prices and balances
+        val (prices, account) = fetchPricesAndAccount(settings.mexcApiSecret)
+        val balancesInUsdt = buildBalancesInUsdt(account.balances, prices)
+
+        sellUnlistedCoins(balancesInUsdt, availableList, settings.mexcApiSecret)
+        buyMissingCoins(balancesInUsdt, availableList, account.balances, settings.mexcApiSecret)
+        rebalancePositions(balancesInUsdt, settings.excludedCoins, account.balances, settings.mexcApiSecret)
+    }
+
+    private suspend fun fetchMarketData(
+        cmcApiKey: String,
+        topCoinsLimit: Int,
+    ): Pair<List<String>, Set<String>> = coroutineScope {
+        val topDeferred = async {
+            cmcService.getListings(cmcApiKey, topCoinsLimit).data.map { it.symbol }
+        }
+        val infoDeferred = async {
+            mexcService.getExchangeInfo().symbols
+                .filter { it.quoteAsset == QUOTE_ASSET }
+                .map { it.baseAsset }
+                .toSet()
+        }
+        topDeferred.await() to infoDeferred.await()
+    }
+
+    private suspend fun fetchPricesAndAccount(secret: String): Pair<Map<String, Double>, MexcAccountResponse> {
         val prices = mexcService.getAllPrices()
             .associate { it.symbol to (it.price.toDoubleOrNull() ?: 0.0) }
         val timestamp = System.currentTimeMillis()
-        val signature = signMexcQuery("timestamp=$timestamp", settings.mexcApiSecret)
+        val signature = signMexcQuery("timestamp=$timestamp", secret)
         val account = mexcService.getAccount(timestamp, signature)
+        return prices to account
+    }
 
-        // Build USDT-value map for held coins
-        val balancesInUsdt = mutableMapOf<String, Double>()
-        for (balance in account.balances.filter { it.asset != QUOTE_ASSET }) {
+    private fun buildBalancesInUsdt(
+        balances: List<MexcBalanceDto>,
+        prices: Map<String, Double>,
+    ): Map<String, Double> {
+        val result = mutableMapOf<String, Double>()
+        for (balance in balances.filter { it.asset != QUOTE_ASSET }) {
             val quantity = balance.free.toDoubleOrNull() ?: 0.0
             val price = prices["${balance.asset}$QUOTE_ASSET"] ?: continue
             val value = (quantity * price).floor2()
-            if (value > 1.0) balancesInUsdt[balance.asset] = value
+            if (value > 1.0) result[balance.asset] = value
         }
+        return result
+    }
 
-        val mine = balancesInUsdt.keys
-
-        // Step 3: Sell unlisted coins
-        val toSell = buildCoinsToSell(mine, availableList)
+    private suspend fun sellUnlistedCoins(
+        balancesInUsdt: Map<String, Double>,
+        availableList: List<String>,
+        secret: String,
+    ) {
+        val toSell = buildCoinsToSell(balancesInUsdt.keys, availableList)
         for (coin in toSell) {
             val value = balancesInUsdt[coin] ?: continue
-            placeOrder(
-                coin = coin,
-                side = OrderSide.SELL,
-                usdtAmount = value,
-                secret = settings.mexcApiSecret
-            )
+            placeOrder(coin = coin, side = OrderSide.SELL, usdtAmount = value, secret = secret)
         }
+    }
 
-        // Step 4: Buy missing coins
-        val missingList = availableList.filter { it !in mine }
-        if (missingList.isNotEmpty()) {
-            val averageValue = if (balancesInUsdt.isEmpty()) 0.0
-            else balancesInUsdt.values.average().floor2()
-            var remaining = account.balances
-                .find { it.asset == QUOTE_ASSET }
-                ?.free?.toDoubleOrNull() ?: 0.0
-            for (coin in missingList) {
-                val toBuy = minOf(averageValue, remaining).floor2()
-                if (toBuy < 1.0) break
-                placeOrder(
-                    coin = coin,
-                    side = OrderSide.BUY,
-                    usdtAmount = toBuy,
-                    secret = settings.mexcApiSecret
-                )
-                remaining -= toBuy
-            }
+    private suspend fun buyMissingCoins(
+        balancesInUsdt: Map<String, Double>,
+        availableList: List<String>,
+        balances: List<MexcBalanceDto>,
+        secret: String,
+    ) {
+        val missingList = availableList.filter { it !in balancesInUsdt.keys }
+        if (missingList.isEmpty()) return
+
+        val averageValue = if (balancesInUsdt.isEmpty()) 0.0
+        else balancesInUsdt.values.average().floor2()
+        var remaining = balances.find { it.asset == QUOTE_ASSET }?.free?.toDoubleOrNull() ?: 0.0
+
+        for (coin in missingList) {
+            val toBuy = minOf(averageValue, remaining).floor2()
+            if (toBuy < 1.0) break
+            placeOrder(coin = coin, side = OrderSide.BUY, usdtAmount = toBuy, secret = secret)
+            remaining -= toBuy
         }
+    }
 
-        // Step 5: Rebalance existing positions
-        val eligible = balancesInUsdt.filter { (symbol, _) -> symbol !in settings.excludedCoins }
-        if (eligible.isEmpty()) return@runCatching
-        val freeUsdt = account.balances
-            .find { it.asset == QUOTE_ASSET }
-            ?.free?.toDoubleOrNull() ?: 0.0
-        val total = eligible.values.sum() + freeUsdt
-        val target = (total / eligible.size).floor2()
+    private suspend fun rebalancePositions(
+        balancesInUsdt: Map<String, Double>,
+        excludedCoins: List<String>,
+        balances: List<MexcBalanceDto>,
+        secret: String,
+    ) {
+        val eligible = balancesInUsdt.filter { (symbol, _) -> symbol !in excludedCoins }
+        if (eligible.isEmpty()) return
+
+        val freeUsdt = balances.find { it.asset == QUOTE_ASSET }?.free?.toDoubleOrNull() ?: 0.0
+        val target = ((eligible.values.sum() + freeUsdt) / eligible.size).floor2()
 
         for ((coin, value) in eligible) {
             val excess = (value - target).floor2()
-            if (excess > 1.0) placeOrder(
-                coin = coin,
-                side = OrderSide.SELL,
-                usdtAmount = excess,
-                secret = settings.mexcApiSecret
-            )
+            if (excess > 1.0) placeOrder(coin = coin, side = OrderSide.SELL, usdtAmount = excess, secret = secret)
         }
         for ((coin, value) in eligible) {
             val deficit = (target - value).floor2()
-            if (deficit > 1.0) placeOrder(
-                coin = coin,
-                side = OrderSide.BUY,
-                usdtAmount = deficit,
-                secret = settings.mexcApiSecret
-            )
+            if (deficit > 1.0) placeOrder(coin = coin, side = OrderSide.BUY, usdtAmount = deficit, secret = secret)
         }
     }
 
@@ -144,5 +153,4 @@ class RebalancerUseCase @Inject constructor(
             Timber.e("REBALANCER placeOrder failed: ${coin}$QUOTE_ASSET side=$side error=${it.message} body=$body")
         }
     }
-
 }

@@ -5,6 +5,7 @@ import com.alexcemen.cryptoportfolio.data.network.QUOTE_ASSET
 import com.alexcemen.cryptoportfolio.data.network.MexcApiService
 import com.alexcemen.cryptoportfolio.data.network.OrderSide
 import com.alexcemen.cryptoportfolio.data.network.signMexcQuery
+import com.alexcemen.cryptoportfolio.domain.model.CoinData
 import com.alexcemen.cryptoportfolio.domain.repository.PortfolioRepository
 import timber.log.Timber
 import com.alexcemen.cryptoportfolio.domain.repository.SettingsRepository
@@ -28,39 +29,43 @@ class SellUseCase @Inject constructor(
 
         if (portfolio.coins.isEmpty()) throw IllegalStateException("Portfolio is empty")
 
-        val precisions = mexcService.getExchangeInfo().symbols
-            .filter { it.quoteAsset == QUOTE_ASSET }
-            .associate { it.baseAsset to it.baseAssetPrecision }
+        val precisions = fetchPrecisions()
 
         portfolio.coins.forEach { coin ->
             val coinShare = coin.totalPositionUsdt / portfolio.totalUsdt
             val coinSellUsdt = usdtAmount * coinShare
             if (coinSellUsdt < 1.0) return@forEach
-
-            runCatching {
-                val scale = precisions[coin.symbol] ?: 8
-                val qty = BigDecimal(coinSellUsdt / coin.priceUsdt)
-                    .setScale(scale, RoundingMode.FLOOR)
-                    .toPlainString()
-                val timestamp = System.currentTimeMillis()
-                val signature = signMexcQuery(
-                    query = "symbol=${coin.symbol}$QUOTE_ASSET&side=SELL&type=$ORDER_TYPE_MARKET&quantity=$qty&timestamp=$timestamp",
-                    secret = settings.mexcApiSecret
-                )
-                Timber.d("SELL placeOrder: symbol=${coin.symbol}$QUOTE_ASSET quantity=$qty")
-                mexcService.placeOrderByQty(
-                    symbol = "${coin.symbol}$QUOTE_ASSET",
-                    side = OrderSide.SELL,
-                    type = ORDER_TYPE_MARKET,
-                    quantity = qty,
-                    timestamp = timestamp,
-                    signature = signature,
-                )
-            }.onFailure {
-                val body = (it as? HttpException)?.response()?.errorBody()?.string()
-                Timber.e("SELL failed: ${coin.symbol}$QUOTE_ASSET error=${it.message} body=$body")
-            }
+            placeSellOrder(coin, coinSellUsdt, precisions[coin.symbol] ?: 8, settings.mexcApiSecret)
         }
     }
 
+    private suspend fun fetchPrecisions(): Map<String, Int> =
+        mexcService.getExchangeInfo().symbols
+            .filter { it.quoteAsset == QUOTE_ASSET }
+            .associate { it.baseAsset to it.baseAssetPrecision }
+
+    private suspend fun placeSellOrder(coin: CoinData, coinSellUsdt: Double, precision: Int, secret: String) {
+        runCatching {
+            val qty = BigDecimal(coinSellUsdt / coin.priceUsdt)
+                .setScale(precision, RoundingMode.FLOOR)
+                .toPlainString()
+            val timestamp = System.currentTimeMillis()
+            val signature = signMexcQuery(
+                query = "symbol=${coin.symbol}$QUOTE_ASSET&side=SELL&type=$ORDER_TYPE_MARKET&quantity=$qty&timestamp=$timestamp",
+                secret = secret
+            )
+            Timber.d("SELL placeOrder: symbol=${coin.symbol}$QUOTE_ASSET quantity=$qty")
+            mexcService.placeOrderByQty(
+                symbol = "${coin.symbol}$QUOTE_ASSET",
+                side = OrderSide.SELL,
+                type = ORDER_TYPE_MARKET,
+                quantity = qty,
+                timestamp = timestamp,
+                signature = signature,
+            )
+        }.onFailure {
+            val body = (it as? HttpException)?.response()?.errorBody()?.string()
+            Timber.e("SELL failed: ${coin.symbol}$QUOTE_ASSET error=${it.message} body=$body")
+        }
+    }
 }

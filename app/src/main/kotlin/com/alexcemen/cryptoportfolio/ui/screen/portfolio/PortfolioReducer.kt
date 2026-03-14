@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class PortfolioReducer @Inject constructor() : Reducer<PortfolioStore.State, PortfolioStore.UiState> {
     override fun reduce(state: PortfolioStore.State) = PortfolioStore.UiState(
-        coins = state.portfolio.coins.map { coin ->
+        coins = state.portfolio.coins.sortedByDescending { it.totalPositionUsdt }.map { coin ->
             PortfolioStore.CoinUi(
                 symbol = coin.symbol,
                 priceUsdt = "$%.4f".format(Locale.US, coin.priceUsdt),

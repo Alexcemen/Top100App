@@ -33,7 +33,8 @@ class UpdatePortfolioUseCase @Inject constructor(
             .filter { it.asset !in settings.excludedCoins }
             .mapNotNull { balance ->
                 val quantity = balance.free.toDoubleOrNull() ?: 0.0
-                val price = prices["${balance.asset}$QUOTE_ASSET"] ?: return@mapNotNull null
+                val price = if (balance.asset == QUOTE_ASSET) 1.0
+                    else prices["${balance.asset}$QUOTE_ASSET"] ?: return@mapNotNull null
                 if (quantity * price < 0.01) return@mapNotNull null
                 CoinData(symbol = balance.asset, priceUsdt = price, quantity = quantity)
             }

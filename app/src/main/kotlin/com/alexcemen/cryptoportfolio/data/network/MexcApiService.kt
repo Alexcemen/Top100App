@@ -29,4 +29,14 @@ interface MexcApiService {
         @Query("timestamp") timestamp: Long,
         @Query("signature") signature: String,
     ): Any
+
+    @POST("api/v3/order")
+    suspend fun placeOrderByQty(
+        @Query("symbol") symbol: String,
+        @Query("side") side: OrderSide,
+        @Query("type") type: String,
+        @Query("quantity") quantity: String,
+        @Query("timestamp") timestamp: Long,
+        @Query("signature") signature: String,
+    ): Any
 }

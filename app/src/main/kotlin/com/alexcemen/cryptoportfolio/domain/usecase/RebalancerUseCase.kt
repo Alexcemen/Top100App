@@ -11,6 +11,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
 import javax.inject.Inject
+import retrofit2.HttpException
 
 class RebalancerUseCase @Inject constructor(
     private val checkSettings: CheckSettingsUseCase,
@@ -123,10 +124,10 @@ class RebalancerUseCase @Inject constructor(
             val timestamp = System.currentTimeMillis()
             val quoteQty = usdtAmount.toString()
             val signature = signMexcQuery(
-                query = "symbol=${coin}USDT&side=${side.name}&type=$ORDER_TYPE_MARKET&quoteOrderQty=$quoteQty&timestamp=$timestamp",
+                query = "symbol=${coin}$QUOTE_ASSET&side=${side.name}&type=$ORDER_TYPE_MARKET&quoteOrderQty=$quoteQty&timestamp=$timestamp",
                 secret = secret
             )
-            Timber.d("REBALANCER placeOrder: symbol=${coin}USDT side=$side quoteOrderQty=$quoteQty")
+            Timber.d("REBALANCER placeOrder: symbol=${coin}$QUOTE_ASSET side=$side quoteOrderQty=$quoteQty")
             mexcService.placeOrder(
                 symbol = "${coin}$QUOTE_ASSET",
                 side = side,
@@ -136,7 +137,8 @@ class RebalancerUseCase @Inject constructor(
                 signature = signature,
             )
         }.onFailure {
-            Timber.e("REBALANCER placeOrder failed: ${coin}USDT side=$side error=${it.message}")
+            val body = (it as? HttpException)?.response()?.errorBody()?.string()
+            Timber.e("REBALANCER placeOrder failed: ${coin}$QUOTE_ASSET side=$side error=${it.message} body=$body")
         }
     }
 

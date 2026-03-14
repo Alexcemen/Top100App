@@ -11,7 +11,6 @@ internal fun buildAvailableCoins(
 internal fun buildCoinsToSell(
     mine: Set<String>,
     available: List<String>,
-    excluded: Set<String>,
-): List<String> = mine.filter { it !in available && it !in excluded }
+): List<String> = mine.filter { it !in available }
 
 internal fun Double.floor2(): Double = floor(this * 100.0) / 100.0

@@ -60,7 +60,7 @@ class RebalancerUseCase @Inject constructor(
         val mine = balancesInUsdt.keys
 
         // Step 3: Sell unlisted coins
-        val toSell = buildCoinsToSell(mine, available, settings.excludedCoins.toSet())
+        val toSell = buildCoinsToSell(mine, available)
         for (coin in toSell) {
             val value = balancesInUsdt[coin] ?: continue
             if (value > 1.0) placeOrder(coin, "SELL", usdtAmount = value, secret = settings.mexcApiSecret)

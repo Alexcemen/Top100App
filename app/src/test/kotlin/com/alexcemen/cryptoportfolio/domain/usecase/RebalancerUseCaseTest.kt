@@ -32,8 +32,7 @@ class RebalancerUseCaseTest {
     fun buildCoinsToSell_returnsCoinsNotInAvailable() {
         val mine = setOf("BTC", "ETH", "DOGE")
         val available = listOf("BTC", "ETH", "SOL")
-        val excluded = emptySet<String>()
-        val result = buildCoinsToSell(mine, available, excluded)
+        val result = buildCoinsToSell(mine, available)
         assertTrue("DOGE" in result)
         assertFalse("BTC" in result)
         assertFalse("ETH" in result)
@@ -43,8 +42,7 @@ class RebalancerUseCaseTest {
     fun buildCoinsToSell_excludedCoinsNotSold() {
         val mine = setOf("BTC", "USDT", "DOGE")
         val available = listOf("BTC", "ETH")
-        val excluded = setOf("USDT")
-        val result = buildCoinsToSell(mine, available, excluded)
+        val result = buildCoinsToSell(mine, available)
         assertFalse("USDT" in result)
         assertTrue("DOGE" in result)
     }

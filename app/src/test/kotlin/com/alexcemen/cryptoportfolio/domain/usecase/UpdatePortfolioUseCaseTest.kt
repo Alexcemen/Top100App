@@ -1,14 +1,11 @@
 package com.alexcemen.cryptoportfolio.domain.usecase
 
-import com.alexcemen.cryptoportfolio.data.network.MexcApiService
-import com.alexcemen.cryptoportfolio.data.network.OrderSide
-import com.alexcemen.cryptoportfolio.data.network.dto.MexcAccountResponse
-import com.alexcemen.cryptoportfolio.data.network.dto.MexcBalanceDto
-import com.alexcemen.cryptoportfolio.data.network.dto.MexcExchangeInfoResponse
-import com.alexcemen.cryptoportfolio.data.network.dto.MexcTickerPriceDto
+import com.alexcemen.cryptoportfolio.domain.model.AssetBalance
 import com.alexcemen.cryptoportfolio.domain.model.CoinData
 import com.alexcemen.cryptoportfolio.domain.model.PortfolioData
 import com.alexcemen.cryptoportfolio.domain.model.SettingsData
+import com.alexcemen.cryptoportfolio.domain.model.TradeSide
+import com.alexcemen.cryptoportfolio.domain.repository.MexcRepository
 import com.alexcemen.cryptoportfolio.domain.repository.PortfolioRepository
 import com.alexcemen.cryptoportfolio.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
@@ -43,26 +40,16 @@ class UpdatePortfolioUseCaseTest {
         override suspend fun savePortfolio(coins: List<CoinData>) { savedCoins = coins }
     }
 
-    private val fakeMexcService = object : MexcApiService {
-        override suspend fun getAccount(timestamp: Long, signature: String) =
-            MexcAccountResponse(listOf(
-                MexcBalanceDto("ETH", "1.5", "0.0"),
-                MexcBalanceDto("USDT", "100.0", "0.0"),
-                MexcBalanceDto("SOL", "0.0", "0.0"),  // zero balance — should be excluded
-            ))
-        override suspend fun getExchangeInfo() = MexcExchangeInfoResponse(emptyList())
-        override suspend fun getAllPrices() = listOf(
-            MexcTickerPriceDto("ETHUSDT", "2000.0"),
-            MexcTickerPriceDto("SOLUSDT", "150.0"),
+    private val fakeMexcRepository = object : MexcRepository {
+        override suspend fun getBalances(): List<AssetBalance> = listOf(
+            AssetBalance("ETH", quantity = 1.5, priceUsdt = 2000.0),
+            AssetBalance("USDT", quantity = 100.0, priceUsdt = 1.0),
+            AssetBalance("SOL", quantity = 0.0, priceUsdt = 150.0),  // zero balance — should be excluded
         )
-        override suspend fun placeOrder(
-            symbol: String,
-            side: OrderSide,
-            type: String,
-            quoteOrderQty: String,
-            timestamp: Long,
-            signature: String,
-        ): Any = Unit
+        override suspend fun getTradableSymbols(): Set<String> = setOf("ETH", "SOL")
+        override suspend fun getAssetPrecisions(): Map<String, Int> = emptyMap()
+        override suspend fun placeMarketOrderByUsdt(symbol: String, side: TradeSide, usdtAmount: Double) {}
+        override suspend fun placeMarketSellByQty(symbol: String, qty: String) {}
     }
 
 
@@ -72,7 +59,7 @@ class UpdatePortfolioUseCaseTest {
             checkSettings = CheckSettingsUseCase(emptySettingsRepo),
             settingsRepository = emptySettingsRepo,
             portfolioRepository = fakePortfolioRepo,
-            mexcService = fakeMexcService,
+            mexcRepository = fakeMexcRepository,
         )
         val result = useCase()
         assertTrue(result.isFailure)
@@ -84,14 +71,14 @@ class UpdatePortfolioUseCaseTest {
             checkSettings = CheckSettingsUseCase(validSettingsRepo),
             settingsRepository = validSettingsRepo,
             portfolioRepository = fakePortfolioRepo,
-            mexcService = fakeMexcService,
+            mexcRepository = fakeMexcRepository,
         )
         val result = useCase()
         assertTrue(result.isSuccess)
         assertTrue(savedCoins != null)
         // ETH has 1.5 qty, price 2000 = $3000 position > threshold
         // USDT is excluded
-        // SOL has 0 qty so no position
+        // SOL has 0 qty so no position (valueUsdt = 0 < 0.01)
         assertTrue(savedCoins!!.any { it.symbol == "ETH" })
         assertTrue(savedCoins!!.none { it.symbol == "USDT" })
     }

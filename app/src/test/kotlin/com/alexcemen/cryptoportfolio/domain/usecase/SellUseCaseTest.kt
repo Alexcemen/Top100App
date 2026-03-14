@@ -1,18 +1,17 @@
 package com.alexcemen.cryptoportfolio.domain.usecase
 
-import com.alexcemen.cryptoportfolio.data.network.MexcApiService
-import com.alexcemen.cryptoportfolio.data.network.dto.MexcAccountResponse
-import com.alexcemen.cryptoportfolio.data.network.dto.MexcExchangeInfoResponse
-import com.alexcemen.cryptoportfolio.data.network.dto.MexcOrderRequest
-import com.alexcemen.cryptoportfolio.data.network.dto.MexcTickerPriceDto
+import com.alexcemen.cryptoportfolio.domain.model.AssetBalance
 import com.alexcemen.cryptoportfolio.domain.model.CoinData
 import com.alexcemen.cryptoportfolio.domain.model.PortfolioData
 import com.alexcemen.cryptoportfolio.domain.model.SettingsData
+import com.alexcemen.cryptoportfolio.domain.model.TradeSide
+import com.alexcemen.cryptoportfolio.domain.repository.MexcRepository
 import com.alexcemen.cryptoportfolio.domain.repository.PortfolioRepository
 import com.alexcemen.cryptoportfolio.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -44,53 +43,56 @@ class SellUseCaseTest {
         override suspend fun savePortfolio(coins: List<CoinData>) {}
     }
 
-    private val ordersPlaced = mutableListOf<MexcOrderRequest>()
-    private val fakeMexcService = object : MexcApiService {
-        override suspend fun getAccount(timestamp: Long, signature: String) = MexcAccountResponse(emptyList())
-        override suspend fun getExchangeInfo() = MexcExchangeInfoResponse(emptyList())
-        override suspend fun getAllPrices(): List<MexcTickerPriceDto> = emptyList()
-        override suspend fun placeOrder(order: MexcOrderRequest, timestamp: Long, signature: String): Any {
-            ordersPlaced.add(order)
-            return Unit
-        }
+    private data class SellCall(val symbol: String, val qty: String)
+    private val sellCalls = mutableListOf<SellCall>()
 
+    private val fakeMexcRepository = object : MexcRepository {
+        override suspend fun getBalances(): List<AssetBalance> = emptyList()
+        override suspend fun getTradableSymbols(): Set<String> = emptySet()
+        override suspend fun getAssetPrecisions(): Map<String, Int> = mapOf("ETH" to 6, "BTC" to 6)
+        override suspend fun placeMarketOrderByUsdt(symbol: String, side: TradeSide, usdtAmount: Double) {}
+        override suspend fun placeMarketSellByQty(symbol: String, qty: String) {
+            sellCalls.add(SellCall(symbol, qty))
+        }
     }
 
     @Test
     fun missingKeys_returnsFailure() = runTest {
         val useCase = SellUseCase(
             checkSettings = CheckSettingsUseCase(emptySettingsRepo),
-            settingsRepository = emptySettingsRepo,
             portfolioRepository = fakePortfolioRepo,
-            mexcService = fakeMexcService,
+            mexcRepository = fakeMexcRepository,
         )
         assertTrue(useCase(500.0).isFailure)
     }
 
     @Test
-    fun zeroAmount_returnsFailure() = runTest {
+    fun zeroAmount_placesNoOrders() = runTest {
+        sellCalls.clear()
         val useCase = SellUseCase(
             checkSettings = CheckSettingsUseCase(validSettingsRepo),
-            settingsRepository = validSettingsRepo,
             portfolioRepository = fakePortfolioRepo,
-            mexcService = fakeMexcService,
+            mexcRepository = fakeMexcRepository,
         )
-        assertTrue(useCase(0.0).isFailure)
+        val result = useCase(0.0)
+        // zero amount → each coin sell USDT < 1.0 threshold → no orders, but no error
+        assertTrue(result.isSuccess)
+        assertEquals(0, sellCalls.size)
     }
 
     @Test
     fun happyPath_placesProportionalOrders() = runTest {
+        sellCalls.clear()
         val useCase = SellUseCase(
             checkSettings = CheckSettingsUseCase(validSettingsRepo),
-            settingsRepository = validSettingsRepo,
             portfolioRepository = fakePortfolioRepo,
-            mexcService = fakeMexcService,
+            mexcRepository = fakeMexcRepository,
         )
         val result = useCase(900.0)  // 10% of $9000
         assertTrue(result.isSuccess)
-        // Should place 2 orders (one per coin)
-        assertTrue(ordersPlaced.size == 2)
-        assertTrue(ordersPlaced.all { it.side == "SELL" })
-        assertTrue(ordersPlaced.all { it.type == "MARKET" })
+        // Should place 2 sell orders (one per coin)
+        assertEquals(2, sellCalls.size)
+        assertTrue(sellCalls.any { it.symbol == "ETH" })
+        assertTrue(sellCalls.any { it.symbol == "BTC" })
     }
 }

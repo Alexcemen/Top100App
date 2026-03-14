@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.alexcemen.cryptoportfolio.ui.screen.portfolio.PortfolioStore
 import java.text.NumberFormat
@@ -136,6 +137,71 @@ fun PortfolioContent(
                 }
             }
         }
+    }
+}
+
+private val previewCoins = listOf(
+    PortfolioStore.CoinUi(symbol = "BTC", priceUsdt = "$65,432.10", quantity = "0.153", totalPositionUsdt = "$10,011.11"),
+    PortfolioStore.CoinUi(symbol = "ETH", priceUsdt = "$3,210.00", quantity = "1.842", totalPositionUsdt = "$5,912.82"),
+    PortfolioStore.CoinUi(symbol = "SOL", priceUsdt = "$142.50", quantity = "21.0", totalPositionUsdt = "$2,992.50"),
+)
+
+@Preview(name = "Portfolio — with coins", showBackground = true)
+@Composable
+private fun PortfolioContentPreview() {
+    MaterialTheme {
+        PortfolioContent(
+            uiState = PortfolioStore.UiState(
+                coins = previewCoins,
+                totalUsdt = 18916.43,
+                isLoading = false,
+                showSellSheet = false,
+                sellAmountInput = "",
+            ),
+            onEvent = {},
+        )
+    }
+}
+
+@Preview(name = "Portfolio — empty", showBackground = true)
+@Composable
+private fun PortfolioContentEmptyPreview() {
+    MaterialTheme {
+        PortfolioContent(
+            uiState = PortfolioStore.UiState(
+                coins = emptyList(),
+                totalUsdt = 0.0,
+                isLoading = false,
+                showSellSheet = false,
+                sellAmountInput = "",
+            ),
+            onEvent = {},
+        )
+    }
+}
+
+@Preview(name = "Portfolio — loading", showBackground = true)
+@Composable
+private fun PortfolioContentLoadingPreview() {
+    MaterialTheme {
+        PortfolioContent(
+            uiState = PortfolioStore.UiState(
+                coins = previewCoins,
+                totalUsdt = 18916.43,
+                isLoading = true,
+                showSellSheet = false,
+                sellAmountInput = "",
+            ),
+            onEvent = {},
+        )
+    }
+}
+
+@Preview(name = "CoinCard", showBackground = true)
+@Composable
+private fun CoinCardPreview() {
+    MaterialTheme {
+        CoinCard(coin = previewCoins.first())
     }
 }
 

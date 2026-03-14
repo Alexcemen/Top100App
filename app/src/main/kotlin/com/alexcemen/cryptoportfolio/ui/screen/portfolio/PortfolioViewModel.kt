@@ -1,6 +1,8 @@
 package com.alexcemen.cryptoportfolio.ui.screen.portfolio
 
 import androidx.lifecycle.viewModelScope
+import retrofit2.HttpException
+import timber.log.Timber
 import com.alexcemen.cryptoportfolio.domain.usecase.GetPortfolioUseCase
 import com.alexcemen.cryptoportfolio.domain.usecase.RebalancerUseCase
 import com.alexcemen.cryptoportfolio.domain.usecase.SellUseCase
@@ -49,7 +51,12 @@ class PortfolioViewModel @Inject constructor(
                 emit(Effect.SetLoading(true))
                 val result = rebalancer()
                 emit(Effect.SetLoading(false))
-                if (result.isFailure) emit(Effect.ShowSnackbar(result.exceptionOrNull()?.message ?: "Rebalance failed"))
+                if (result.isFailure) {
+                    val e = result.exceptionOrNull()
+                    val body = (e as? HttpException)?.response()?.errorBody()?.string()
+                    Timber.e("REBALANCER error: ${e?.message} body=$body")
+                    emit(Effect.ShowSnackbar(e?.message ?: "Rebalance failed"))
+                }
             }
             Event.OpenSellSheet -> emit(Effect.SetShowSellSheet(true))
             Event.CloseSellSheet -> emit(Effect.SetShowSellSheet(false))

@@ -2,11 +2,11 @@ package com.alexcemen.cryptoportfolio.domain.usecase
 
 import com.alexcemen.cryptoportfolio.data.network.CmcApiService
 import com.alexcemen.cryptoportfolio.data.network.MexcApiService
-import com.alexcemen.cryptoportfolio.data.network.dto.MexcOrderRequest
 import com.alexcemen.cryptoportfolio.domain.repository.PortfolioRepository
 import com.alexcemen.cryptoportfolio.domain.repository.SettingsRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import timber.log.Timber
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
@@ -49,14 +49,13 @@ class RebalancerUseCase @Inject constructor(
         val account = mexcService.getAccount(timestamp, signature)
 
         // Build USDT-value map for held coins
-        val balancesInUsdt = account.balances
-            .filter { it.asset != "USDT" }
-            .mapNotNull { balance ->
-                val qty = balance.free.toDoubleOrNull() ?: 0.0
-                val price = prices["${balance.asset}USDT"] ?: return@mapNotNull null
-                val value = (qty * price).floor2()
-                if (value <= 0.0) null else balance.asset to value
-            }.toMap()
+        val balancesInUsdt = mutableMapOf<String, Double>()
+        for (balance in account.balances.filter { it.asset != "USDT" }) {
+            val qty = balance.free.toDoubleOrNull() ?: 0.0
+            val price = prices["${balance.asset}USDT"] ?: continue
+            val value = (qty * price).floor2()
+            if (value > 0.0) balancesInUsdt[balance.asset] = value
+        }
 
         val mine = balancesInUsdt.keys
 
@@ -64,7 +63,7 @@ class RebalancerUseCase @Inject constructor(
         val toSell = buildCoinsToSell(mine, available, settings.excludedCoins.toSet())
         for (coin in toSell) {
             val value = balancesInUsdt[coin] ?: continue
-            if (value > 1.0) placeOrder(coin, "SELL", quoteQty = null, settings.mexcApiSecret)
+            if (value > 1.0) placeOrder(coin, "SELL", usdtAmount = value, secret = settings.mexcApiSecret)
         }
 
         // Step 4: Buy missing coins
@@ -78,7 +77,7 @@ class RebalancerUseCase @Inject constructor(
             for (coin in missing) {
                 val toBuy = minOf(avgValue, remaining).floor2()
                 if (toBuy < 1.0) break
-                placeOrder(coin, "BUY", quoteQty = toBuy.toString(), settings.mexcApiSecret)
+                placeOrder(coin, "BUY", usdtAmount = toBuy, secret = settings.mexcApiSecret)
                 remaining -= toBuy
             }
         }
@@ -91,21 +90,27 @@ class RebalancerUseCase @Inject constructor(
 
         for ((coin, value) in eligible) {
             val excess = (value - target).floor2()
-            if (excess > 1.0) placeOrder(coin, "SELL", quoteQty = null, settings.mexcApiSecret)
+            if (excess > 1.0) placeOrder(coin, "SELL", usdtAmount = excess, secret = settings.mexcApiSecret)
         }
         for ((coin, value) in eligible) {
             if (value < 1.0) continue
             val deficit = (target - value).floor2()
-            if (deficit > 1.0) placeOrder(coin, "BUY", quoteQty = deficit.toString(), settings.mexcApiSecret)
+            if (deficit > 1.0) placeOrder(coin, "BUY", usdtAmount = deficit, secret = settings.mexcApiSecret)
         }
     }
 
-    private suspend fun placeOrder(coin: String, side: String, quoteQty: String?, secret: String) {
+    private suspend fun placeOrder(coin: String, side: String, usdtAmount: Double, secret: String) {
         val ts = System.currentTimeMillis()
-        val sig = signQuery("symbol=${coin}USDT&side=$side&type=MARKET&timestamp=$ts", secret)
+        val quoteQty = usdtAmount.toString()
+        val sig = signQuery("symbol=${coin}USDT&side=$side&type=MARKET&quoteOrderQty=$quoteQty&timestamp=$ts", secret)
+        Timber.d("REBALANCER placeOrder: symbol=${coin}USDT side=$side quoteOrderQty=$quoteQty")
         mexcService.placeOrder(
-            MexcOrderRequest(symbol = "${coin}USDT", side = side, quoteOrderQty = quoteQty),
-            ts, sig,
+            symbol = "${coin}USDT",
+            side = side,
+            type = "MARKET",
+            quoteOrderQty = quoteQty,
+            timestamp = ts,
+            signature = sig,
         )
     }
 

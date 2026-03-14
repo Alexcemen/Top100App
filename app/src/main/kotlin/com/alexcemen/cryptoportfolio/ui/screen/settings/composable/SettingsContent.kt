@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.alexcemen.cryptoportfolio.ui.screen.settings.SettingsStore
 
@@ -147,6 +148,68 @@ fun SettingsContent(
                 }
             }
         }
+    }
+}
+
+private val previewSettingsUiState = SettingsStore.UiState(
+    cmcApiKey = "abc-123-def",
+    mexcApiKey = "mexc-key-xyz",
+    mexcApiSecret = "mexc-secret-xyz",
+    topCoinsLimit = 20,
+    excludedCoins = listOf("USDT", "USDC", "BUSD"),
+    editingField = null,
+    isLoading = false,
+)
+
+@Preview(name = "Settings — default", showBackground = true)
+@Composable
+private fun SettingsContentPreview() {
+    MaterialTheme {
+        SettingsContent(
+            uiState = previewSettingsUiState,
+            onEvent = {},
+            onBack = {},
+        )
+    }
+}
+
+@Preview(name = "Settings — editing CMC key", showBackground = true)
+@Composable
+private fun SettingsContentEditingPreview() {
+    MaterialTheme {
+        SettingsContent(
+            uiState = previewSettingsUiState.copy(editingField = SettingsStore.EditingField.CMC_KEY),
+            onEvent = {},
+            onBack = {},
+        )
+    }
+}
+
+@Preview(name = "Settings — loading", showBackground = true)
+@Composable
+private fun SettingsContentLoadingPreview() {
+    MaterialTheme {
+        SettingsContent(
+            uiState = previewSettingsUiState.copy(isLoading = true),
+            onEvent = {},
+            onBack = {},
+        )
+    }
+}
+
+@Preview(name = "SettingRow — view mode", showBackground = true)
+@Composable
+private fun SettingRowViewPreview() {
+    MaterialTheme {
+        SettingRow(label = "CMC API Key", value = "abc-123-def", isEditing = false, onStartEdit = {}, onSave = {}, onCancel = {})
+    }
+}
+
+@Preview(name = "SettingRow — edit mode", showBackground = true)
+@Composable
+private fun SettingRowEditPreview() {
+    MaterialTheme {
+        SettingRow(label = "CMC API Key", value = "abc-123-def", isEditing = true, onStartEdit = {}, onSave = {}, onCancel = {})
     }
 }
 

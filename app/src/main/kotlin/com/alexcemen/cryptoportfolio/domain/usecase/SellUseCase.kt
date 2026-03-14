@@ -1,7 +1,6 @@
 package com.alexcemen.cryptoportfolio.domain.usecase
 
 import com.alexcemen.cryptoportfolio.data.network.MexcApiService
-import com.alexcemen.cryptoportfolio.data.network.dto.MexcOrderRequest
 import com.alexcemen.cryptoportfolio.domain.repository.PortfolioRepository
 import com.alexcemen.cryptoportfolio.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
@@ -29,18 +28,16 @@ class SellUseCase @Inject constructor(
             val coinSellUsdt = usdtAmount * coinShare
             if (coinSellUsdt < 1.0) return@forEach
 
-            val qty = coinSellUsdt / coin.priceUsdt
+            val quoteQty = coinSellUsdt.toString()
             val timestamp = System.currentTimeMillis()
-            val queryString = "symbol=${coin.symbol}USDT&side=SELL&type=MARKET&quantity=${"%.6f".format(qty)}&timestamp=$timestamp"
-            val signature = signQuery(queryString, settings.mexcApiSecret)
+            val signature = signQuery("symbol=${coin.symbol}USDT&side=SELL&type=MARKET&quoteOrderQty=$quoteQty&timestamp=$timestamp", settings.mexcApiSecret)
             mexcService.placeOrder(
-                MexcOrderRequest(
-                    symbol = "${coin.symbol}USDT",
-                    side = "SELL",
-                    quantity = "%.6f".format(qty),
-                ),
-                timestamp,
-                signature,
+                symbol = "${coin.symbol}USDT",
+                side = "SELL",
+                type = "MARKET",
+                quoteOrderQty = quoteQty,
+                timestamp = timestamp,
+                signature = signature,
             )
         }
     }

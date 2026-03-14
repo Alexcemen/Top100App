@@ -24,7 +24,10 @@ interface MexcApiService {
 
     @POST("api/v3/order")
     suspend fun placeOrder(
-        @Body order: MexcOrderRequest,
+        @Query("symbol") symbol: String,
+        @Query("side") side: String,
+        @Query("type") type: String,
+        @Query("quoteOrderQty") quoteOrderQty: String,
         @Query("timestamp") timestamp: Long,
         @Query("signature") signature: String,
     ): Any

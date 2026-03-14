@@ -4,10 +4,11 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.alexcemen.cryptoportfolio.data.db.entity.CoinEntity
 
+private const val DATABASE_VERSION = 1
+
 @Database(
     entities = [CoinEntity::class],
-    version = 1,
-    exportSchema = false
+    version = DATABASE_VERSION
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun portfolioDao(): PortfolioDao

@@ -1,6 +1,7 @@
 package com.alexcemen.cryptoportfolio.domain.usecase
 
 import com.alexcemen.cryptoportfolio.data.network.MexcApiService
+import com.alexcemen.cryptoportfolio.data.network.OrderSide
 import com.alexcemen.cryptoportfolio.domain.repository.PortfolioRepository
 import com.alexcemen.cryptoportfolio.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
@@ -33,7 +34,7 @@ class SellUseCase @Inject constructor(
             val signature = signQuery("symbol=${coin.symbol}USDT&side=SELL&type=MARKET&quoteOrderQty=$quoteQty&timestamp=$timestamp", settings.mexcApiSecret)
             mexcService.placeOrder(
                 symbol = "${coin.symbol}USDT",
-                side = "SELL",
+                side = OrderSide.SELL,
                 type = "MARKET",
                 quoteOrderQty = quoteQty,
                 timestamp = timestamp,

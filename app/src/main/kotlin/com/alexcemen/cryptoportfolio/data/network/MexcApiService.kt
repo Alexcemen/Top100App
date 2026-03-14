@@ -2,9 +2,7 @@ package com.alexcemen.cryptoportfolio.data.network
 
 import com.alexcemen.cryptoportfolio.data.network.dto.MexcAccountResponse
 import com.alexcemen.cryptoportfolio.data.network.dto.MexcExchangeInfoResponse
-import com.alexcemen.cryptoportfolio.data.network.dto.MexcOrderRequest
 import com.alexcemen.cryptoportfolio.data.network.dto.MexcTickerPriceDto
-import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
@@ -25,7 +23,7 @@ interface MexcApiService {
     @POST("api/v3/order")
     suspend fun placeOrder(
         @Query("symbol") symbol: String,
-        @Query("side") side: String,
+        @Query("side") side: OrderSide,
         @Query("type") type: String,
         @Query("quoteOrderQty") quoteOrderQty: String,
         @Query("timestamp") timestamp: Long,

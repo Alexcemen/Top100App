@@ -113,7 +113,7 @@ fun PortfolioContent(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Text("Sell Portfolio", style = MaterialTheme.typography.titleLarge)
+                    Text("Sell", style = MaterialTheme.typography.titleLarge)
                     OutlinedTextField(
                         value = uiState.sellAmountInput,
                         onValueChange = { onEvent(PortfolioStore.Event.SetSellAmount(it)) },
@@ -156,6 +156,23 @@ private fun PortfolioContentPreview() {
                 totalUsdt = 18916.43,
                 isLoading = false,
                 showSellSheet = false,
+                sellAmountInput = "",
+            ),
+            onEvent = {},
+        )
+    }
+}
+
+@Preview(name = "Portfolio — with coins", showBackground = true)
+@Composable
+private fun PortfolioContentSellPreview() {
+    MaterialTheme {
+        PortfolioContent(
+            uiState = PortfolioStore.UiState(
+                coins = previewCoins,
+                totalUsdt = 18916.43,
+                isLoading = false,
+                showSellSheet = true,
                 sellAmountInput = "",
             ),
             onEvent = {},

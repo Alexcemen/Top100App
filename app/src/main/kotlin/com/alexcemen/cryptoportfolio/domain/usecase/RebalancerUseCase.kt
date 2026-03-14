@@ -96,7 +96,10 @@ class RebalancerUseCase @Inject constructor(
         // Step 5: Rebalance existing positions
         val eligible = balancesInUsdt.filter { (symbol, _) -> symbol !in settings.excludedCoins }
         if (eligible.isEmpty()) return@runCatching
-        val total = eligible.values.sum()
+        val freeUsdt = account.balances
+            .find { it.asset == QUOTE_ASSET }
+            ?.free?.toDoubleOrNull() ?: 0.0
+        val total = eligible.values.sum() + freeUsdt
         val target = (total / eligible.size).floor2()
 
         for ((coin, value) in eligible) {

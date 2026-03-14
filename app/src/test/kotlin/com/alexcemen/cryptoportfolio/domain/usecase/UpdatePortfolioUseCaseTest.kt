@@ -1,13 +1,10 @@
 package com.alexcemen.cryptoportfolio.domain.usecase
 
-import com.alexcemen.cryptoportfolio.data.network.CmcApiService
 import com.alexcemen.cryptoportfolio.data.network.MexcApiService
-import com.alexcemen.cryptoportfolio.data.network.dto.CmcCoinDto
-import com.alexcemen.cryptoportfolio.data.network.dto.CmcListingsResponse
+import com.alexcemen.cryptoportfolio.data.network.OrderSide
 import com.alexcemen.cryptoportfolio.data.network.dto.MexcAccountResponse
 import com.alexcemen.cryptoportfolio.data.network.dto.MexcBalanceDto
 import com.alexcemen.cryptoportfolio.data.network.dto.MexcExchangeInfoResponse
-import com.alexcemen.cryptoportfolio.data.network.dto.MexcOrderRequest
 import com.alexcemen.cryptoportfolio.data.network.dto.MexcTickerPriceDto
 import com.alexcemen.cryptoportfolio.domain.model.CoinData
 import com.alexcemen.cryptoportfolio.domain.model.PortfolioData
@@ -58,22 +55,24 @@ class UpdatePortfolioUseCaseTest {
             MexcTickerPriceDto("ETHUSDT", "2000.0"),
             MexcTickerPriceDto("SOLUSDT", "150.0"),
         )
-        override suspend fun placeOrder(order: MexcOrderRequest, timestamp: Long, signature: String): Any = Unit
+        override suspend fun placeOrder(
+            symbol: String,
+            side: OrderSide,
+            type: String,
+            quoteOrderQty: String,
+            timestamp: Long,
+            signature: String,
+        ): Any = Unit
     }
 
-    private val fakeCmcService = object : CmcApiService {
-        override suspend fun getListings(apiKey: String, limit: Int, sort: String) =
-            CmcListingsResponse(listOf(CmcCoinDto("BTC"), CmcCoinDto("ETH"), CmcCoinDto("SOL")))
-    }
 
     @Test
     fun missingKeys_returnsFailure() = runTest {
         val useCase = UpdatePortfolioUseCase(
             checkSettings = CheckSettingsUseCase(emptySettingsRepo),
-            settingsRepo = emptySettingsRepo,
-            portfolioRepo = fakePortfolioRepo,
+            settingsRepository = emptySettingsRepo,
+            portfolioRepository = fakePortfolioRepo,
             mexcService = fakeMexcService,
-            cmcService = fakeCmcService,
         )
         val result = useCase()
         assertTrue(result.isFailure)
@@ -83,10 +82,9 @@ class UpdatePortfolioUseCaseTest {
     fun happyPath_savesCoins() = runTest {
         val useCase = UpdatePortfolioUseCase(
             checkSettings = CheckSettingsUseCase(validSettingsRepo),
-            settingsRepo = validSettingsRepo,
-            portfolioRepo = fakePortfolioRepo,
+            settingsRepository = validSettingsRepo,
+            portfolioRepository = fakePortfolioRepo,
             mexcService = fakeMexcService,
-            cmcService = fakeCmcService,
         )
         val result = useCase()
         assertTrue(result.isSuccess)

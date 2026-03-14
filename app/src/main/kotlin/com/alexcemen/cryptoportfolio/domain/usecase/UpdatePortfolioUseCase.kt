@@ -1,6 +1,5 @@
 package com.alexcemen.cryptoportfolio.domain.usecase
 
-import com.alexcemen.cryptoportfolio.data.network.CmcApiService
 import com.alexcemen.cryptoportfolio.data.network.MexcApiService
 import com.alexcemen.cryptoportfolio.domain.model.CoinData
 import com.alexcemen.cryptoportfolio.domain.repository.PortfolioRepository
@@ -11,15 +10,14 @@ import javax.inject.Inject
 
 class UpdatePortfolioUseCase @Inject constructor(
     private val checkSettings: CheckSettingsUseCase,
-    private val settingsRepo: SettingsRepository,
-    private val portfolioRepo: PortfolioRepository,
+    private val settingsRepository: SettingsRepository,
+    private val portfolioRepository: PortfolioRepository,
     private val mexcService: MexcApiService,
-    private val cmcService: CmcApiService,
 ) {
     suspend operator fun invoke(): Result<Unit> = runCatching {
         if (!checkSettings()) throw IllegalStateException("API keys not configured")
 
-        val settings = settingsRepo.getSettings()
+        val settings = settingsRepository.getSettings()
 
         // Fetch all ticker prices from MEXC
         val prices = mexcService.getAllPrices()
@@ -34,13 +32,13 @@ class UpdatePortfolioUseCase @Inject constructor(
         val coins = account.balances
             .filter { it.asset !in settings.excludedCoins }
             .mapNotNull { balance ->
-                val qty = balance.free.toDoubleOrNull() ?: 0.0
+                val quantity = balance.free.toDoubleOrNull() ?: 0.0
                 val price = prices["${balance.asset}USDT"] ?: return@mapNotNull null
-                if (qty * price < 0.01) return@mapNotNull null
-                CoinData(symbol = balance.asset, priceUsdt = price, quantity = qty)
+                if (quantity * price < 0.01) return@mapNotNull null
+                CoinData(symbol = balance.asset, priceUsdt = price, quantity = quantity)
             }
 
-        portfolioRepo.savePortfolio(coins)
+        portfolioRepository.savePortfolio(coins)
     }
 
     private fun signQuery(query: String, secret: String): String {

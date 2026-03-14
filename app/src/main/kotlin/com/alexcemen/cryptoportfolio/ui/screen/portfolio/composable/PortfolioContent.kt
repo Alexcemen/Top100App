@@ -3,8 +3,6 @@ package com.alexcemen.cryptoportfolio.ui.screen.portfolio.composable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,71 +20,35 @@ import java.util.Locale
 fun PortfolioContent(
     uiState: PortfolioStore.UiState,
     onEvent: (PortfolioStore.Event) -> Unit,
+    contentPadding: PaddingValues = PaddingValues(),
 ) {
     val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.US) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Portfolio") },
-                    actions = {
-                        IconButton(onClick = { onEvent(PortfolioStore.Event.NavigateToSettings) }) {
-                            Icon(Icons.Default.Settings, contentDescription = "Settings")
-                        }
-                    }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+                .padding(horizontal = 16.dp)
+        ) {
+            // Header card
+            Card(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                Text(
+                    text = currencyFormat.format(uiState.totalUsdt),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(16.dp),
                 )
-            },
-            bottomBar = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(
-                        onClick = { onEvent(PortfolioStore.Event.Update) },
-                        enabled = !uiState.isLoading,
-                        modifier = Modifier.weight(1f),
-                    ) { Text("Update") }
-                    Button(
-                        onClick = { onEvent(PortfolioStore.Event.Rebalance) },
-                        enabled = !uiState.isLoading,
-                        modifier = Modifier.weight(1f),
-                    ) { Text("Rebalance") }
-                    Button(
-                        onClick = { onEvent(PortfolioStore.Event.OpenSellSheet) },
-                        enabled = !uiState.isLoading,
-                        modifier = Modifier.weight(1f),
-                    ) { Text("Sell") }
-                }
             }
-        ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 16.dp)
-            ) {
-                // Header card
-                Card(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                    Text(
-                        text = currencyFormat.format(uiState.totalUsdt),
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(16.dp),
-                    )
-                }
 
-                if (uiState.coins.isEmpty() && !uiState.isLoading) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("No portfolio data. Tap Update to fetch.")
-                    }
-                } else {
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(uiState.coins, key = { it.symbol }) { coin ->
-                            CoinCard(coin = coin)
-                        }
+            if (uiState.coins.isEmpty() && !uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No portfolio data. Tap Update to fetch.")
+                }
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(uiState.coins, key = { it.symbol }) { coin ->
+                        CoinCard(coin = coin)
                     }
                 }
             }

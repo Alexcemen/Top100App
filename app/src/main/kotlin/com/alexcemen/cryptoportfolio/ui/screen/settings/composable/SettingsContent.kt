@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -19,12 +18,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.alexcemen.cryptoportfolio.ui.screen.settings.SettingsStore
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsContent(
     uiState: SettingsStore.UiState,
     onEvent: (SettingsStore.Event) -> Unit,
-    onBack: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(),
 ) {
     var addCoinInput by remember { mutableStateOf("") }
@@ -37,15 +34,6 @@ fun SettingsContent(
         if (uiState.isLoading) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
-
-        TopAppBar(
-            title = { Text("Settings") },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-            }
-        )
 
         Column(
             modifier = Modifier
@@ -168,7 +156,6 @@ private fun SettingsContentPreview() {
         SettingsContent(
             uiState = previewSettingsUiState,
             onEvent = {},
-            onBack = {},
         )
     }
 }
@@ -180,7 +167,6 @@ private fun SettingsContentEditingPreview() {
         SettingsContent(
             uiState = previewSettingsUiState.copy(editingField = SettingsStore.EditingField.CMC_KEY),
             onEvent = {},
-            onBack = {},
         )
     }
 }
@@ -192,7 +178,6 @@ private fun SettingsContentLoadingPreview() {
         SettingsContent(
             uiState = previewSettingsUiState.copy(isLoading = true),
             onEvent = {},
-            onBack = {},
         )
     }
 }

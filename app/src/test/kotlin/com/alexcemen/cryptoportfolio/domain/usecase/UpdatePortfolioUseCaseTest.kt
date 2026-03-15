@@ -5,12 +5,15 @@ import com.alexcemen.cryptoportfolio.domain.model.CoinData
 import com.alexcemen.cryptoportfolio.domain.model.PortfolioData
 import com.alexcemen.cryptoportfolio.domain.model.SettingsData
 import com.alexcemen.cryptoportfolio.domain.model.TradeSide
+import com.alexcemen.cryptoportfolio.domain.repository.CmcRepository
 import com.alexcemen.cryptoportfolio.domain.repository.MexcRepository
 import com.alexcemen.cryptoportfolio.domain.repository.PortfolioRepository
 import com.alexcemen.cryptoportfolio.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -52,6 +55,15 @@ class UpdatePortfolioUseCaseTest {
         override suspend fun placeMarketSellByQty(symbol: String, qty: String) {}
     }
 
+    private val fakeCmcRepo = object : CmcRepository {
+        override suspend fun getTopCoins(apiKey: String, limit: Int) = listOf("ETH")
+        override suspend fun getCoinIds(apiKey: String, limit: Int) = mapOf("ETH" to 1027)
+    }
+
+    private val emptyCmcRepo = object : CmcRepository {
+        override suspend fun getTopCoins(apiKey: String, limit: Int) = emptyList<String>()
+        override suspend fun getCoinIds(apiKey: String, limit: Int) = emptyMap<String, Int>()
+    }
 
     @Test
     fun missingKeys_returnsFailure() = runTest {
@@ -60,6 +72,7 @@ class UpdatePortfolioUseCaseTest {
             settingsRepository = emptySettingsRepo,
             portfolioRepository = fakePortfolioRepo,
             mexcRepository = fakeMexcRepository,
+            cmcRepository = fakeCmcRepo,
         )
         val result = useCase()
         assertTrue(result.isFailure)
@@ -72,6 +85,7 @@ class UpdatePortfolioUseCaseTest {
             settingsRepository = validSettingsRepo,
             portfolioRepository = fakePortfolioRepo,
             mexcRepository = fakeMexcRepository,
+            cmcRepository = fakeCmcRepo,
         )
         val result = useCase()
         assertTrue(result.isSuccess)
@@ -81,5 +95,35 @@ class UpdatePortfolioUseCaseTest {
         // SOL has 0 qty so no position (valueUsdt = 0 < 0.01)
         assertTrue(savedCoins!!.any { it.symbol == "ETH" })
         assertTrue(savedCoins!!.none { it.symbol == "USDT" })
+    }
+
+    @Test
+    fun happyPath_logoUrlIsSet() = runTest {
+        val useCase = UpdatePortfolioUseCase(
+            checkSettings = CheckSettingsUseCase(validSettingsRepo),
+            settingsRepository = validSettingsRepo,
+            portfolioRepository = fakePortfolioRepo,
+            mexcRepository = fakeMexcRepository,
+            cmcRepository = fakeCmcRepo,
+        )
+        useCase()
+        val eth = savedCoins!!.first { it.symbol == "ETH" }
+        assertEquals(
+            "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
+            eth.logoUrl
+        )
+    }
+
+    @Test
+    fun cmcReturnsNoIds_logoUrlIsNull() = runTest {
+        val useCase = UpdatePortfolioUseCase(
+            checkSettings = CheckSettingsUseCase(validSettingsRepo),
+            settingsRepository = validSettingsRepo,
+            portfolioRepository = fakePortfolioRepo,
+            mexcRepository = fakeMexcRepository,
+            cmcRepository = emptyCmcRepo,
+        )
+        useCase()
+        assertTrue(savedCoins!!.all { it.logoUrl == null })
     }
 }

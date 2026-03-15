@@ -26,6 +26,20 @@ class PortfolioRepositoryImpl @Inject constructor(
         dao.replaceAll(coins.map { it.toEntity() })
     }
 
-    private fun CoinEntity.toDomain() = CoinData(symbol, priceUsdt, quantity)
-    private fun CoinData.toEntity() = CoinEntity(symbol, priceUsdt, quantity)
+    private fun CoinEntity.toDomain() = CoinData(
+        symbol = symbol,
+        priceUsdt = priceUsdt,
+        quantity = quantity,
+        logoUrl = cmcId?.let { "https://s2.coinmarketcap.com/static/img/coins/64x64/$it.png" },
+    )
+
+    private fun CoinData.toEntity() = CoinEntity(
+        symbol = symbol,
+        priceUsdt = priceUsdt,
+        quantity = quantity,
+        cmcId = logoUrl
+            ?.removePrefix("https://s2.coinmarketcap.com/static/img/coins/64x64/")
+            ?.removeSuffix(".png")
+            ?.toIntOrNull(),
+    )
 }

@@ -8,4 +8,5 @@ data class CoinEntity(
     @PrimaryKey val symbol: String,
     val priceUsdt: Double,
     val quantity: Double,
+    val cmcId: Int? = null,
 )

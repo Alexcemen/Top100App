@@ -4,7 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.alexcemen.cryptoportfolio.data.db.entity.CoinEntity
 
-private const val DATABASE_VERSION = 1
+private const val DATABASE_VERSION = 2
 
 @Database(
     entities = [CoinEntity::class],

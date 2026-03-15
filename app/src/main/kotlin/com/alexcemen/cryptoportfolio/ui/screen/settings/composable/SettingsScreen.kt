@@ -10,6 +10,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -20,6 +21,7 @@ import com.alexcemen.cryptoportfolio.RootNavigation
 import com.alexcemen.cryptoportfolio.ui.mvi.sideEffect
 import com.alexcemen.cryptoportfolio.ui.screen.settings.SettingsStore
 import com.alexcemen.cryptoportfolio.ui.screen.settings.SettingsViewModel
+import com.alexcemen.cryptoportfolio.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,14 +40,28 @@ fun SettingsScreenContent(viewModel: SettingsViewModel = hiltViewModel()) {
     }
 
     Scaffold(
+        containerColor = AppTheme.colors.background.basic,
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = {
+                    Text(
+                        "Settings",
+                        style = AppTheme.textStyle.titleOne,
+                        color = AppTheme.colors.text.primary,
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { nav?.removeLastOrNull() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = AppTheme.colors.text.primary,
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = AppTheme.colors.background.basic,
+                ),
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }

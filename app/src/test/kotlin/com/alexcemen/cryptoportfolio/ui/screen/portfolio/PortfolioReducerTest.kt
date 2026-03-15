@@ -4,6 +4,7 @@ import com.alexcemen.cryptoportfolio.domain.model.CoinData
 import com.alexcemen.cryptoportfolio.domain.model.PortfolioData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -37,5 +38,33 @@ class PortfolioReducerTest {
         assertEquals("ETH", ui.coins[0].symbol)
         assertTrue(ui.coins[0].priceUsdt.contains("2000"))
         assertTrue(ui.coins[0].quantity.contains("1.5"))
+    }
+
+    @Test
+    fun logoUrl_mappedThroughToCoinUi() {
+        val coin = CoinData(
+            symbol = "ETH",
+            priceUsdt = 2000.0,
+            quantity = 1.0,
+            logoUrl = "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
+        )
+        val state = PortfolioStore.State(
+            portfolio = PortfolioData(listOf(coin), coin.totalPositionUsdt),
+        )
+        val ui = reducer.reduce(state)
+        assertEquals(
+            "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
+            ui.coins[0].logoUrl
+        )
+    }
+
+    @Test
+    fun logoUrl_nullWhenNotSet() {
+        val coin = CoinData(symbol = "BTC", priceUsdt = 60000.0, quantity = 0.1)
+        val state = PortfolioStore.State(
+            portfolio = PortfolioData(listOf(coin), coin.totalPositionUsdt),
+        )
+        val ui = reducer.reduce(state)
+        assertNull(ui.coins[0].logoUrl)
     }
 }

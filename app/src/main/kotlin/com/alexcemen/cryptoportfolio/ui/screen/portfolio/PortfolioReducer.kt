@@ -12,6 +12,7 @@ class PortfolioReducer @Inject constructor() : Reducer<PortfolioStore.State, Por
                 priceUsdt = "$%.4f".format(Locale.US, coin.priceUsdt),
                 quantity = "%.6f".format(Locale.US, coin.quantity),
                 totalPositionUsdt = "$%.2f".format(Locale.US, coin.totalPositionUsdt),
+                logoUrl = coin.logoUrl,
             )
         },
         totalUsdt = state.portfolio.totalUsdt,

@@ -28,6 +28,7 @@ object PortfolioStore {
         val priceUsdt: String,
         val quantity: String,
         val totalPositionUsdt: String,
+        val logoUrl: String? = null,
     )
 
     sealed interface Event : MviEvent {

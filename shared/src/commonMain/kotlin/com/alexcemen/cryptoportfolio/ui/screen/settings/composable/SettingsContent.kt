@@ -18,8 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.alexcemen.cryptoportfolio.ui.screen.settings.SettingsStore
 import com.alexcemen.cryptoportfolio.ui.theme.AppTheme
-import cryptoportfolio.shared.generated.resources.Res
-import cryptoportfolio.shared.generated.resources.*
+import top100app.shared.generated.resources.Res
+import top100app.shared.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

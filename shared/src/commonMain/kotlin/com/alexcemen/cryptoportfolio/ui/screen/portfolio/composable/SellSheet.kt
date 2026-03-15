@@ -21,8 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.alexcemen.cryptoportfolio.ui.screen.portfolio.PortfolioStore
 import com.alexcemen.cryptoportfolio.ui.theme.AppTheme
-import cryptoportfolio.shared.generated.resources.Res
-import cryptoportfolio.shared.generated.resources.*
+import top100app.shared.generated.resources.Res
+import top100app.shared.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)

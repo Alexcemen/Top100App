@@ -25,6 +25,10 @@
 - `data/repository/` — PortfolioRepositoryImpl (Room), SettingsRepositoryImpl (EncryptedSharedPreferences)
 - `di/` — DatabaseModule, NetworkModule, RepositoryModule
 
+## Permissions
+- All code changes in this repo (edits, builds, tests, commits, file writes) — proceed without asking
+- Only ask before: network requests to external services, accessing files outside this repo, destructive git operations that can't be rolled back (force-push to remote, etc.)
+
 ## Rules
 1. API keys stored ONLY in EncryptedSharedPreferences — never in plain SharedPreferences or files
 2. New screens: create Store → Reducer (with unit test) → ViewModel → Composables
@@ -41,6 +45,8 @@
 
 ## Dependencies (key versions)
 - AGP 8.10.1, Kotlin 2.1.21, KSP 2.1.21-2.0.1
-- Hilt 2.57.2, Room 2.7.1, Retrofit 2.11.0, OkHttp 4.12.0
+- Hilt 2.57.2, Room 2.7.1 (current schema version: 2), Retrofit 2.11.0, OkHttp 4.12.0
 - Navigation3 1.0.0, Compose BOM 2025.06.00
 - Security Crypto 1.0.0 (uses MasterKeys.getOrCreate API, not MasterKey.Builder)
+- Coil 2.7.0 (coil-compose) — async coin icon loading
+- material-icons-extended (BOM-managed) — SwapVert, AccountBalance, CallMade icons

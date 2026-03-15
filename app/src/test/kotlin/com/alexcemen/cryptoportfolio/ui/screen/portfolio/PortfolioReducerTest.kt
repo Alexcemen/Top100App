@@ -4,6 +4,7 @@ import com.alexcemen.cryptoportfolio.domain.model.CoinData
 import com.alexcemen.cryptoportfolio.domain.model.PortfolioData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -16,7 +17,7 @@ class PortfolioReducerTest {
         val state = PortfolioStore.State(portfolio = PortfolioData(emptyList(), 0.0), isLoading = false)
         val ui = reducer.reduce(state)
         assertTrue(ui.coins.isEmpty())
-        assertEquals(0.0, ui.totalUsdt, 0.001)
+        assertEquals("$0.00", ui.totalUsdt)
         assertFalse(ui.isLoading)
     }
 
@@ -56,6 +57,25 @@ class PortfolioReducerTest {
             "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
             ui.coins[0].logoUrl
         )
+    }
+
+    @Test
+    fun avatarColorIndex_isInValidRange() {
+        val coins = listOf("BTC", "ETH", "SOL", "DOGE", "ADA").map { symbol ->
+            CoinData(symbol = symbol, priceUsdt = 1.0, quantity = 1.0)
+        }
+        val state = PortfolioStore.State(portfolio = PortfolioData(coins, 5.0))
+        val ui = reducer.reduce(state)
+        ui.coins.forEach { coin ->
+            assertTrue("avatarColorIndex must be in [0, 6]", coin.avatarColorIndex in 0..6)
+        }
+    }
+
+    @Test
+    fun totalUsdt_formattedAsCurrency() {
+        val state = PortfolioStore.State(portfolio = PortfolioData(emptyList(), 18916.43))
+        val ui = reducer.reduce(state)
+        assertEquals("$18,916.43", ui.totalUsdt)
     }
 
     @Test

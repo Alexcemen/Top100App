@@ -17,7 +17,7 @@ object PortfolioStore {
 
     data class UiState(
         val coins: List<CoinUi>,
-        val totalUsdt: Double,
+        val totalUsdt: String,
         val isLoading: Boolean,
         val showSellSheet: Boolean,
         val sellAmountInput: String,
@@ -29,6 +29,7 @@ object PortfolioStore {
         val quantity: String,
         val totalPositionUsdt: String,
         val logoUrl: String? = null,
+        val avatarColorIndex: Int = 0,
     )
 
     sealed interface Event : MviEvent {

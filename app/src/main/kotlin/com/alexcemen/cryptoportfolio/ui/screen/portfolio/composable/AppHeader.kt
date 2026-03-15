@@ -1,0 +1,69 @@
+package com.alexcemen.cryptoportfolio.ui.screen.portfolio.composable
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.alexcemen.cryptoportfolio.ui.screen.portfolio.PortfolioStore
+import com.alexcemen.cryptoportfolio.ui.theme.AppTheme
+
+@Composable
+internal fun AppHeader(onEvent: (PortfolioStore.Event) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.AccountBalance,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = AppTheme.colors.text.primary,
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                "CryptoPortfolio",
+                style = AppTheme.textStyle.titleOne,
+                color = AppTheme.colors.text.primary,
+            )
+        }
+        Surface(
+            modifier = Modifier.size(36.dp),
+            shape = CircleShape,
+            color = AppTheme.colors.background.secondaryTwo,
+        ) {
+            IconButton(onClick = { onEvent(PortfolioStore.Event.NavigateToSettings) }) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings",
+                    modifier = Modifier.size(32.dp),
+                    tint = AppTheme.colors.text.primary,
+                )
+            }
+        }
+    }
+}
+
+@Preview(name = "AppHeader", showBackground = true, backgroundColor = 0xFF0A0A0A)
+@Composable
+private fun AppHeaderPreview() {
+    AppTheme(themeDark = true) {
+        AppHeader(onEvent = {})
+    }
+}

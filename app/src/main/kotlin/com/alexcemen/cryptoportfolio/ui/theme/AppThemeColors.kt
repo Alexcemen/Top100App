@@ -27,11 +27,24 @@ interface AppThemeColors {
         val mask: Color
         val yellow: Color
         val blueLight: Color
+        val purple: Color
+        val gray: Color
     }
 
     val text: Text
     val background: Background
 }
+
+val AppThemeColors.avatarColors: List<Color>
+    get() = listOf(
+        background.blue,
+        background.green,
+        background.red,
+        background.yellow,
+        background.blueLight,
+        background.purple,
+        background.gray,
+    )
 
 class AppThemeColorsSchemes(
     val dark: AppThemeColors,
@@ -64,6 +77,8 @@ object LightBackground : AppThemeColors.Background {
     override val mask: Color get() = Color(0xFFCCCCCC)
     override val yellow: Color get() = Color(0xFFD9BA0D)
     override val blueLight: Color get() = Color(0xFF7EAFE1)
+    override val purple: Color get() = Color(0xFF7B5EA7)
+    override val gray: Color get() = Color(0xFF7A7A7A)
 }
 
 object LightColor : AppThemeColors {
@@ -96,6 +111,8 @@ object DarkBackground : AppThemeColors.Background {
     override val mask: Color get() = Color(0xFF8F8F8F)
     override val yellow: Color get() = Color(0xFFA68E0F)
     override val blueLight: Color get() = Color(0xFF3C6479)
+    override val purple: Color get() = Color(0xFF6B4A8A)
+    override val gray: Color get() = Color(0xFF5C5C5C)
 }
 
 object DarkColor : AppThemeColors {

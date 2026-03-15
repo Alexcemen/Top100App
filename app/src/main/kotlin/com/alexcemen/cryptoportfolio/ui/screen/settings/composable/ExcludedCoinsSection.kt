@@ -76,6 +76,7 @@ internal fun ExcludedCoinsSection(
                                 color = AppTheme.colors.text.placeholder,
                             )
                         },
+                        shape = RoundedCornerShape(16.dp),
                         modifier = Modifier
                             .weight(1f)
                             .padding(end = 4.dp),
@@ -116,7 +117,7 @@ internal fun ExcludedCoinsSection(
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(excludedCoins) { coin ->
                     Surface(
-                        shape = RoundedCornerShape(50.dp),
+                        shape = RoundedCornerShape(8.dp),
                         color = AppTheme.colors.background.secondary,
                     ) {
                         Row(

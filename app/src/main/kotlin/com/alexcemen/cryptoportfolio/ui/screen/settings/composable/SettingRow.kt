@@ -63,6 +63,7 @@ internal fun SettingRow(
                             .padding(top = 8.dp),
                         singleLine = true,
                         textStyle = AppTheme.textStyle.bodyOne,
+                        shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = AppTheme.colors.text.primary,
                             unfocusedTextColor = AppTheme.colors.text.primary,

@@ -74,7 +74,7 @@ object LightColor : AppThemeColors {
 @Immutable
 object DarkText : AppThemeColors.Text {
     override val primary: Color get() = Color(0xFFFFFFFF)
-    override val placeholder: Color get() = Color(0xFFA6A6A6)
+    override val placeholder: Color get() = Color(0xFF8A8A8A)
     override val red: Color get() = Color(0xFFE67474)
     override val blue: Color get() = Color(0xFF588BD4)
     override val primaryUniform: Color get() = Color(0xFF1C1C1C)
@@ -85,12 +85,12 @@ object DarkText : AppThemeColors.Text {
 
 @Immutable
 object DarkBackground : AppThemeColors.Background {
-    override val basic: Color get() = Color(0xFF262626)
+    override val basic: Color get() = Color(0xFF0A0A0A)
     override val blue: Color get() = Color(0xFF376EB6)
     override val red: Color get() = Color(0xFF9A3B3B)
     override val green: Color get() = Color(0xFF33914D)
-    override val secondary: Color get() = Color(0xFF9C9C9C)
-    override val secondaryTwo: Color get() = Color(0xFF3F3F3F)
+    override val secondary: Color get() = Color(0xFF2C2C2C)
+    override val secondaryTwo: Color get() = Color(0xFF1C1C1C)
     override val primary: Color get() = Color(0xFFF6F6F6)
     override val basicUniform: Color get() = Color(0xFFFFFFFF)
     override val mask: Color get() = Color(0xFF8F8F8F)

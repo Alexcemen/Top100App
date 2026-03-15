@@ -17,8 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.alexcemen.cryptoportfolio.R
 import com.alexcemen.cryptoportfolio.ui.screen.portfolio.PortfolioStore
 import com.alexcemen.cryptoportfolio.ui.theme.AppTheme
 
@@ -58,7 +60,7 @@ fun PortfolioContent(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            "No portfolio data. Tap Update to fetch.",
+                            stringResource(R.string.portfolio_empty),
                             style = AppTheme.textStyle.captionOne,
                             color = AppTheme.colors.text.placeholder,
                         )

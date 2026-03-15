@@ -15,8 +15,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.alexcemen.cryptoportfolio.R
 import com.alexcemen.cryptoportfolio.ui.screen.settings.SettingsStore
 import com.alexcemen.cryptoportfolio.ui.theme.AppTheme
 
@@ -51,7 +53,7 @@ fun SettingsContent(
         ) {
             item {
                 SettingRow(
-                    label = "CMC API Key",
+                    label = stringResource(R.string.label_cmc_api_key),
                     value = uiState.cmcApiKey,
                     isEditing = uiState.editingField == SettingsStore.EditingField.CMC_KEY,
                     onStartEdit = { onEvent(SettingsStore.Event.StartEdit(SettingsStore.EditingField.CMC_KEY)) },
@@ -61,7 +63,7 @@ fun SettingsContent(
             }
             item {
                 SettingRow(
-                    label = "MEXC API Key",
+                    label = stringResource(R.string.label_mexc_api_key),
                     value = uiState.mexcApiKey,
                     isEditing = uiState.editingField == SettingsStore.EditingField.MEXC_KEY,
                     onStartEdit = { onEvent(SettingsStore.Event.StartEdit(SettingsStore.EditingField.MEXC_KEY)) },
@@ -71,7 +73,7 @@ fun SettingsContent(
             }
             item {
                 SettingRow(
-                    label = "MEXC API Secret",
+                    label = stringResource(R.string.label_mexc_api_secret),
                     value = uiState.mexcApiSecret,
                     isEditing = uiState.editingField == SettingsStore.EditingField.MEXC_SECRET,
                     onStartEdit = { onEvent(SettingsStore.Event.StartEdit(SettingsStore.EditingField.MEXC_SECRET)) },
@@ -81,7 +83,7 @@ fun SettingsContent(
             }
             item {
                 SettingRow(
-                    label = "Top Coins Limit",
+                    label = stringResource(R.string.label_top_coins_limit),
                     value = uiState.topCoinsLimit.toString(),
                     isEditing = uiState.editingField == SettingsStore.EditingField.TOP_COINS_LIMIT,
                     onStartEdit = { onEvent(SettingsStore.Event.StartEdit(SettingsStore.EditingField.TOP_COINS_LIMIT)) },

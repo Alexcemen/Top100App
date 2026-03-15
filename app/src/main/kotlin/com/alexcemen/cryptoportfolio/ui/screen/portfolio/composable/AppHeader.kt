@@ -54,7 +54,7 @@ internal fun AppHeader(onEvent: (PortfolioStore.Event) -> Unit) {
             IconButton(onClick = { onEvent(PortfolioStore.Event.NavigateToSettings) }) {
                 Icon(
                     imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings",
+                    contentDescription = stringResource(R.string.cd_settings),
                     modifier = Modifier.size(32.dp),
                     tint = AppTheme.colors.text.primary,
                 )

@@ -1,14 +1,13 @@
 package com.alexcemen.cryptoportfolio.domain.usecase
 
 import com.alexcemen.cryptoportfolio.domain.model.TradeSide
+import com.alexcemen.cryptoportfolio.domain.model.USDT
 import com.alexcemen.cryptoportfolio.domain.repository.CmcRepository
 import com.alexcemen.cryptoportfolio.domain.repository.MexcRepository
 import com.alexcemen.cryptoportfolio.domain.repository.SettingsRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
-
-private const val USDT = "USDT"
 
 class RebalancerUseCase @Inject constructor(
     private val checkSettings: CheckSettingsUseCase,

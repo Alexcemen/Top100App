@@ -18,8 +18,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.alexcemen.cryptoportfolio.R
 import com.alexcemen.cryptoportfolio.ui.screen.portfolio.PortfolioStore
 import com.alexcemen.cryptoportfolio.ui.theme.AppTheme
 
@@ -34,11 +36,11 @@ internal fun SellSheet(sellAmountInput: String, onEvent: (PortfolioStore.Event) 
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("Sell", style = AppTheme.textStyle.titleOne, color = AppTheme.colors.text.primary)
+            Text(stringResource(R.string.action_sell), style = AppTheme.textStyle.titleOne, color = AppTheme.colors.text.primary)
             OutlinedTextField(
                 value = sellAmountInput,
                 onValueChange = { onEvent(PortfolioStore.Event.SetSellAmount(it)) },
-                label = { Text("USDT amount") },
+                label = { Text(stringResource(R.string.sell_usdt_amount_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 textStyle = AppTheme.textStyle.bodyOne,
@@ -79,7 +81,7 @@ internal fun SellSheet(sellAmountInput: String, onEvent: (PortfolioStore.Event) 
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.padding(vertical = 16.dp),
                 ) {
-                    Text("Sell", style = AppTheme.textStyle.bodyOne, color = AppTheme.colors.text.primaryUniform)
+                    Text(stringResource(R.string.action_sell), style = AppTheme.textStyle.bodyOne, color = AppTheme.colors.text.primaryUniform)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))

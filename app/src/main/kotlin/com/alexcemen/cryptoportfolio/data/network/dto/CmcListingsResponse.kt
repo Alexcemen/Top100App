@@ -1,4 +1,10 @@
 package com.alexcemen.cryptoportfolio.data.network.dto
 
-data class CmcListingsResponse(val data: List<CmcCoinDto>)
-data class CmcCoinDto(val id: Int, val symbol: String)
+data class CmcListingsResponse(
+    val data: List<CmcCoinDto>
+)
+
+data class CmcCoinDto(
+    val id: Int,
+    val symbol: String
+)

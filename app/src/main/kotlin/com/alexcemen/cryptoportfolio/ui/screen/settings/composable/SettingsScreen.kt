@@ -15,7 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.alexcemen.cryptoportfolio.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.alexcemen.cryptoportfolio.RootNavigation
 import com.alexcemen.cryptoportfolio.ui.mvi.sideEffect
@@ -45,7 +47,7 @@ fun SettingsScreenContent(viewModel: SettingsViewModel = hiltViewModel()) {
             TopAppBar(
                 title = {
                     Text(
-                        "Settings",
+                        stringResource(R.string.settings_title),
                         style = AppTheme.textStyle.titleOne,
                         color = AppTheme.colors.text.primary,
                     )
@@ -54,7 +56,7 @@ fun SettingsScreenContent(viewModel: SettingsViewModel = hiltViewModel()) {
                     IconButton(onClick = { nav?.removeLastOrNull() }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.cd_back),
                             tint = AppTheme.colors.text.primary,
                         )
                     }

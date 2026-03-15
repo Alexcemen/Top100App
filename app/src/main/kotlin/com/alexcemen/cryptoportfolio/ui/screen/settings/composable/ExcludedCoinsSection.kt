@@ -33,8 +33,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.alexcemen.cryptoportfolio.R
 import com.alexcemen.cryptoportfolio.ui.theme.AppTheme
 
 @Composable
@@ -71,7 +73,7 @@ internal fun ExcludedCoinsSection(
                         onValueChange = { addCoinInput = it.uppercase() },
                         placeholder = {
                             Text(
-                                "Add ticker...",
+                                stringResource(R.string.excluded_coins_add_placeholder),
                                 style = AppTheme.textStyle.captionOne,
                                 color = AppTheme.colors.text.placeholder,
                             )
@@ -96,20 +98,20 @@ internal fun ExcludedCoinsSection(
                             addCoinInput = ""
                         }
                     }) {
-                        Icon(Icons.Default.Check, contentDescription = "Add coin", tint = AppTheme.colors.text.primary)
+                        Icon(Icons.Default.Check, contentDescription = stringResource(R.string.cd_add_coin), tint = AppTheme.colors.text.primary)
                     }
                     IconButton(onClick = onCancelEdit) {
-                        Icon(Icons.Default.Close, contentDescription = "Cancel", tint = AppTheme.colors.text.placeholder)
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cd_cancel), tint = AppTheme.colors.text.placeholder)
                     }
                 } else {
                     Text(
-                        "Excluded Coins",
+                        stringResource(R.string.excluded_coins_title),
                         style = AppTheme.textStyle.captionOne,
                         color = AppTheme.colors.text.placeholder,
                         modifier = Modifier.weight(1f),
                     )
                     IconButton(onClick = onStartEdit) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit excluded coins", tint = AppTheme.colors.text.placeholder)
+                        Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.cd_edit_excluded_coins), tint = AppTheme.colors.text.placeholder)
                     }
                 }
             }
@@ -133,7 +135,7 @@ internal fun ExcludedCoinsSection(
                                 ) {
                                     Icon(
                                         Icons.Default.Close,
-                                        contentDescription = "Remove $coin",
+                                        contentDescription = stringResource(R.string.cd_remove_coin, coin),
                                         modifier = Modifier.size(12.dp),
                                         tint = AppTheme.colors.text.placeholder,
                                     )

@@ -18,21 +18,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.alexcemen.cryptoportfolio.R
 import com.alexcemen.cryptoportfolio.ui.screen.portfolio.PortfolioStore
 import com.alexcemen.cryptoportfolio.ui.theme.AppTheme
 
 @Composable
 internal fun ActionButtonsRow(isLoading: Boolean, onEvent: (PortfolioStore.Event) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        ActionButton("Update", Icons.Default.Refresh, !isLoading, Modifier.weight(1f)) {
+        ActionButton(stringResource(R.string.action_update), Icons.Default.Refresh, !isLoading, Modifier.weight(1f)) {
             onEvent(PortfolioStore.Event.Update)
         }
-        ActionButton("Rebalance", Icons.Default.SwapVert, !isLoading, Modifier.weight(1f)) {
+        ActionButton(stringResource(R.string.action_rebalance), Icons.Default.SwapVert, !isLoading, Modifier.weight(1f)) {
             onEvent(PortfolioStore.Event.Rebalance)
         }
-        ActionButton("Sell", Icons.AutoMirrored.Filled.CallMade, !isLoading, Modifier.weight(1f)) {
+        ActionButton(stringResource(R.string.action_sell), Icons.AutoMirrored.Filled.CallMade, !isLoading, Modifier.weight(1f)) {
             onEvent(PortfolioStore.Event.OpenSellSheet)
         }
     }

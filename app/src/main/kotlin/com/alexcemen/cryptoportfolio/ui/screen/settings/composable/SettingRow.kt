@@ -23,8 +23,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.alexcemen.cryptoportfolio.R
 import com.alexcemen.cryptoportfolio.ui.theme.AppTheme
 
 @Composable
@@ -76,7 +78,7 @@ internal fun SettingRow(
                     )
                 } else {
                     Text(
-                        text = value.ifBlank { "(not set)" },
+                        text = value.ifBlank { stringResource(R.string.value_not_set) },
                         style = AppTheme.textStyle.bodyOne,
                         color = if (value.isBlank()) AppTheme.colors.text.placeholder else AppTheme.colors.text.primary,
                         modifier = Modifier.padding(top = 4.dp),
@@ -85,14 +87,14 @@ internal fun SettingRow(
             }
             if (isEditing) {
                 IconButton(onClick = { onSave(editText) }) {
-                    Icon(Icons.Default.Check, contentDescription = "Save", tint = AppTheme.colors.text.primary)
+                    Icon(Icons.Default.Check, contentDescription = stringResource(R.string.cd_save), tint = AppTheme.colors.text.primary)
                 }
                 IconButton(onClick = onCancel) {
-                    Icon(Icons.Default.Close, contentDescription = "Cancel", tint = AppTheme.colors.text.placeholder)
+                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cd_cancel), tint = AppTheme.colors.text.placeholder)
                 }
             } else {
                 IconButton(onClick = onStartEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit $label", tint = AppTheme.colors.text.placeholder)
+                    Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.cd_edit, label), tint = AppTheme.colors.text.placeholder)
                 }
             }
         }

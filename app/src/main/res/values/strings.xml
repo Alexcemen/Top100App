@@ -1,3 +1,34 @@
 <resources>
     <string name="app_name">AltCoins</string>
+
+    <!-- Portfolio -->
+    <string name="portfolio_title">Portfolio</string>
+    <string name="portfolio_empty">No portfolio data. Tap Update to fetch.</string>
+    <string name="action_update">Update</string>
+    <string name="action_rebalance">Rebalance</string>
+    <string name="action_sell">Sell</string>
+    <string name="error_update_failed">Update failed</string>
+    <string name="error_rebalance_failed">Rebalance failed</string>
+    <string name="error_sell_failed">Sell failed</string>
+    <string name="sell_usdt_amount_label">USDT amount</string>
+    <string name="cd_settings">Settings</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="cd_back">Back</string>
+    <string name="label_cmc_api_key">CMC API Key</string>
+    <string name="label_mexc_api_key">MEXC API Key</string>
+    <string name="label_mexc_api_secret">MEXC API Secret</string>
+    <string name="label_top_coins_limit">Top Coins Limit</string>
+    <string name="value_not_set">(not set)</string>
+    <string name="cd_save">Save</string>
+    <string name="cd_cancel">Cancel</string>
+    <string name="cd_edit">Edit %1$s</string>
+
+    <!-- Excluded Coins -->
+    <string name="excluded_coins_title">Excluded Coins</string>
+    <string name="excluded_coins_add_placeholder">Add ticker…</string>
+    <string name="cd_add_coin">Add coin</string>
+    <string name="cd_edit_excluded_coins">Edit excluded coins</string>
+    <string name="cd_remove_coin">Remove %1$s</string>
 </resources>

@@ -60,7 +60,7 @@ class PortfolioScreenModel(
             is Event.SetSellAmount -> emit(Effect.SetSellAmount(intent.amount))
             is Event.SetSellPercent -> {
                 val amount = currentState.portfolio.totalUsdt * intent.percent
-                emit(Effect.SetSellAmount("%.2f".format(amount)))
+                emit(Effect.SetSellAmount(com.alexcemen.cryptoportfolio.platform.formatNumber(amount, 2)))
             }
             Event.Sell -> {
                 emit(Effect.SetShowSellSheet(false))

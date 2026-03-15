@@ -1,5 +1,6 @@
 package com.alexcemen.cryptoportfolio.ui.screen.portfolio
 
+import com.alexcemen.cryptoportfolio.platform.formatNumber
 import com.alexcemen.cryptoportfolio.ui.mvi.Reducer
 import kotlin.math.abs
 
@@ -8,14 +9,14 @@ class PortfolioReducer : Reducer<PortfolioStore.State, PortfolioStore.UiState> {
         coins = state.portfolio.coins.sortedByDescending { it.totalPositionUsdt }.map { coin ->
             PortfolioStore.CoinUi(
                 symbol = coin.symbol,
-                priceUsdt = "${"$"}%.4f".format(coin.priceUsdt),
-                quantity = "%.6f".format(coin.quantity),
-                totalPositionUsdt = "${"$"}%.2f".format(coin.totalPositionUsdt),
+                priceUsdt = "${"$"}${formatNumber(coin.priceUsdt, 4)}",
+                quantity = formatNumber(coin.quantity, 6),
+                totalPositionUsdt = "${"$"}${formatNumber(coin.totalPositionUsdt, 2)}",
                 logoUrl = coin.logoUrl,
                 avatarColorIndex = abs(coin.symbol.hashCode()) % AVATAR_COLORS_COUNT,
             )
         },
-        totalUsdt = "${"$"}%.2f".format(state.portfolio.totalUsdt),
+        totalUsdt = "${"$"}${formatNumber(state.portfolio.totalUsdt, 2)}",
         isLoading = state.isLoading,
         showSellSheet = state.showSellSheet,
         sellAmountInput = state.sellAmountInput,

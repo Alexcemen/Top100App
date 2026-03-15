@@ -45,7 +45,12 @@ class PortfolioViewModel @Inject constructor(
                 emit(Effect.SetLoading(true))
                 val result = updatePortfolio()
                 emit(Effect.SetLoading(false))
-                if (result.isFailure) emit(Effect.ShowSnackbar(result.exceptionOrNull()?.message ?: "Update failed"))
+                if (result.isFailure) {
+                    val e = result.exceptionOrNull()
+                    val body = (e as? HttpException)?.response()?.errorBody()?.string()
+                    Timber.e("UPDATE error: ${e?.message} body=$body")
+                    emit(Effect.ShowSnackbar(e?.message ?: "Update failed"))
+                }
             }
             Event.Rebalance -> {
                 emit(Effect.SetLoading(true))

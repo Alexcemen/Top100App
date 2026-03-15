@@ -25,9 +25,9 @@ class SettingsRepositoryImpl @Inject constructor(
             cmcApiKey = prefs.getString(KEY_CMC, "") ?: "",
             mexcApiKey = prefs.getString(KEY_MEXC_KEY, "") ?: "",
             mexcApiSecret = prefs.getString(KEY_MEXC_SECRET, "") ?: "",
-            topCoinsLimit = prefs.getInt(KEY_TOP_LIMIT, 20),
-            excludedCoins = prefs.getString(KEY_EXCLUDED, "USDT,USDC,BUSD")
-                ?.split(",")?.filter { it.isNotBlank() } ?: listOf("USDT", "USDC", "BUSD"),
+            topCoinsLimit = prefs.getInt(KEY_TOP_LIMIT, 100),
+            excludedCoins = prefs.getString(KEY_EXCLUDED, "FDUSD, USD1, PYUSD, USDC, DAI, USDe")
+                ?.split(",")?.filter { it.isNotBlank() } ?: listOf("FDUSD","USD1", "PYUSD", "USDC", "DAI", "USDe"),
         )
     }
 

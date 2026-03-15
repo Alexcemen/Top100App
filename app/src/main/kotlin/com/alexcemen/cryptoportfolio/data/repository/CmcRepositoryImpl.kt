@@ -9,4 +9,7 @@ class CmcRepositoryImpl @Inject constructor(
 ) : CmcRepository {
     override suspend fun getTopCoins(apiKey: String, limit: Int): List<String> =
         cmcService.getListings(apiKey, limit).data.map { it.symbol }
+
+    override suspend fun getCoinIds(apiKey: String, limit: Int): Map<String, Int> =
+        cmcService.getListings(apiKey, limit).data.associate { it.symbol to it.id }
 }

@@ -20,5 +20,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Top100App"
-include(":app")
- 
+include(":shared")
+include(":androidApp")

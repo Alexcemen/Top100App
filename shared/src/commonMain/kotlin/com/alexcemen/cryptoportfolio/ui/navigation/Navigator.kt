@@ -13,6 +13,7 @@ class Navigator {
     val stack: List<Screen> = _stack
 
     val current: Screen get() = _stack.last()
+    val canGoBack: Boolean get() = _stack.size > 1
 
     fun navigate(screen: Screen) {
         _stack.add(screen)

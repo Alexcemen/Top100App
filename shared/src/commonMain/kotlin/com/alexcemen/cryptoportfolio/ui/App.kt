@@ -11,11 +11,17 @@ import com.alexcemen.cryptoportfolio.ui.screen.settings.composable.SettingsScree
 import com.alexcemen.cryptoportfolio.ui.theme.AppTheme
 
 @Composable
+expect fun BackHandler(enabled: Boolean, onBack: () -> Unit)
+
+@Composable
 fun App() {
     val navigator = remember { Navigator() }
 
     CompositionLocalProvider(LocalNavigator provides navigator) {
         AppTheme {
+            BackHandler(enabled = navigator.canGoBack) {
+                navigator.back()
+            }
             when (navigator.current) {
                 Screen.Portfolio -> PortfolioScreenContent()
                 Screen.Settings -> SettingsScreenContent()

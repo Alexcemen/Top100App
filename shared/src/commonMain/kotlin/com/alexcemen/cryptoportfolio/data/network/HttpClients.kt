@@ -12,7 +12,7 @@ fun createCmcHttpClient(): HttpClient = HttpClient {
     install(ContentNegotiation) {
         json(Json { ignoreUnknownKeys = true })
     }
-    install(Logging) { level = LogLevel.BODY }
+    install(Logging) { level = LogLevel.INFO }
     defaultRequest { url("https://pro-api.coinmarketcap.com/") }
 }
 
@@ -20,6 +20,6 @@ fun createMexcHttpClient(): HttpClient = HttpClient {
     install(ContentNegotiation) {
         json(Json { ignoreUnknownKeys = true })
     }
-    install(Logging) { level = LogLevel.BODY }
+    install(Logging) { level = LogLevel.INFO }
     defaultRequest { url("https://api.mexc.com/") }
 }

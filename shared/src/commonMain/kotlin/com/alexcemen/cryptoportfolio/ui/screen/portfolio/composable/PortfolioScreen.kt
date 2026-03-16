@@ -15,10 +15,12 @@ import com.alexcemen.cryptoportfolio.ui.navigation.Screen
 import com.alexcemen.cryptoportfolio.ui.screen.portfolio.PortfolioScreenModel
 import com.alexcemen.cryptoportfolio.ui.screen.portfolio.PortfolioStore
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
+import org.koin.compose.getKoin
 
 @Composable
-fun PortfolioScreenContent(screenModel: PortfolioScreenModel = koinInject()) {
+fun PortfolioScreenContent() {
+    val koin = getKoin()
+    val screenModel = remember { koin.get<PortfolioScreenModel>() }
     val uiState by screenModel.uiState.collectAsState()
     val navigator = LocalNavigator.current
     val snackbarHostState = remember { SnackbarHostState() }

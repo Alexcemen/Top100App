@@ -58,6 +58,7 @@ kotlin {
             implementation(libs.koin.android)
             implementation(libs.security.crypto)
             implementation(libs.kotlinx.coroutines.android)
+            implementation(libs.androidx.activity.compose)
         }
 
         iosMain.dependencies {

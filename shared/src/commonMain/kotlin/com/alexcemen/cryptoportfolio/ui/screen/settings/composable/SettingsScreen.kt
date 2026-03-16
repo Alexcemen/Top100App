@@ -26,11 +26,13 @@ import top100app.shared.generated.resources.Res
 import top100app.shared.generated.resources.*
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
+import org.koin.compose.getKoin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreenContent(screenModel: SettingsScreenModel = koinInject()) {
+fun SettingsScreenContent() {
+    val koin = getKoin()
+    val screenModel = remember { koin.get<SettingsScreenModel>() }
     val uiState by screenModel.uiState.collectAsState()
     val navigator = LocalNavigator.current
     val snackbarHostState = remember { SnackbarHostState() }

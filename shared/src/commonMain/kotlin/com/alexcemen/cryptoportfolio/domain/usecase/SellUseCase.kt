@@ -2,9 +2,10 @@ package com.alexcemen.cryptoportfolio.domain.usecase
 
 import com.alexcemen.cryptoportfolio.domain.repository.MexcRepository
 import com.alexcemen.cryptoportfolio.domain.repository.PortfolioRepository
+import com.alexcemen.cryptoportfolio.platform.formatNumber
 import kotlinx.coroutines.flow.first
+import kotlin.math.floor
 import kotlin.math.pow
-import kotlin.math.roundToLong
 
 class SellUseCase constructor(
     private val checkSettings: CheckSettingsUseCase,
@@ -25,17 +26,9 @@ class SellUseCase constructor(
             val rawQty = coinSellUsdt / coin.priceUsdt
             val scale = precisions[coin.symbol] ?: 8
             val factor = 10.0.pow(scale)
-            val truncated = kotlin.math.floor(rawQty * factor) / factor
-            val qty = formatDouble(truncated, scale)
+            val truncated = floor(rawQty * factor) / factor
+            val qty = formatNumber(truncated, scale)
             mexcRepository.placeMarketSellByQty(coin.symbol, qty)
         }
-    }
-
-    private fun formatDouble(value: Double, decimals: Int): String {
-        val factor = 10.0.pow(decimals)
-        val long = (value * factor).roundToLong()
-        val intPart = long / factor.roundToLong()
-        val fracPart = long % factor.roundToLong()
-        return "$intPart.${fracPart.toString().padStart(decimals, '0')}"
     }
 }

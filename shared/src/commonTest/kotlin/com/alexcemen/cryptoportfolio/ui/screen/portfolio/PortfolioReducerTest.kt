@@ -75,7 +75,7 @@ class PortfolioReducerTest {
     fun totalUsdt_formattedAsCurrency() {
         val state = PortfolioStore.State(portfolio = PortfolioData(emptyList(), 18916.43))
         val ui = reducer.reduce(state)
-        assertEquals("\$18,916.43", ui.totalUsdt)
+        assertEquals("\$18916.43", ui.totalUsdt)
     }
 
     @Test

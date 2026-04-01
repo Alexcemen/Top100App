@@ -4,7 +4,6 @@ import com.alexcemen.cryptoportfolio.domain.model.SettingsData
 import com.alexcemen.cryptoportfolio.domain.repository.SettingsRepository
 import com.alexcemen.cryptoportfolio.platform.SecureStorage
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 
 private const val KEY_CMC = "cmc_api_key"
@@ -17,7 +16,7 @@ class SettingsRepositoryImpl(
     private val secureStorage: SecureStorage,
 ) : SettingsRepository {
 
-    override suspend fun getSettings(): SettingsData = withContext(Dispatchers.IO) {
+    override suspend fun getSettings(): SettingsData = withContext(Dispatchers.Default) {
         SettingsData(
             cmcApiKey = secureStorage.getString(KEY_CMC, ""),
             mexcApiKey = secureStorage.getString(KEY_MEXC_KEY, ""),
@@ -28,7 +27,7 @@ class SettingsRepositoryImpl(
         )
     }
 
-    override suspend fun saveSettings(settings: SettingsData) = withContext(Dispatchers.IO) {
+    override suspend fun saveSettings(settings: SettingsData) = withContext(Dispatchers.Default) {
         secureStorage.putString(KEY_CMC, settings.cmcApiKey)
         secureStorage.putString(KEY_MEXC_KEY, settings.mexcApiKey)
         secureStorage.putString(KEY_MEXC_SECRET, settings.mexcApiSecret)

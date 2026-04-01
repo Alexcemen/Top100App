@@ -12,7 +12,8 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    @Suppress("UnstableApiUsage")
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
     repositories {
         google()
         mavenCentral()
@@ -22,3 +23,4 @@ dependencyResolutionManagement {
 rootProject.name = "Top100App"
 include(":shared")
 include(":androidApp")
+include(":webApp")

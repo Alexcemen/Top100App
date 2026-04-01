@@ -6,7 +6,6 @@ import com.alexcemen.cryptoportfolio.data.network.createCmcHttpClient
 import com.alexcemen.cryptoportfolio.data.network.createMexcHttpClient
 import com.alexcemen.cryptoportfolio.data.repository.CmcRepositoryImpl
 import com.alexcemen.cryptoportfolio.data.repository.MexcRepositoryImpl
-import com.alexcemen.cryptoportfolio.data.repository.PortfolioRepositoryImpl
 import com.alexcemen.cryptoportfolio.data.repository.SettingsRepositoryImpl
 import com.alexcemen.cryptoportfolio.domain.repository.CmcRepository
 import com.alexcemen.cryptoportfolio.domain.repository.MexcRepository
@@ -41,12 +40,8 @@ val commonModule = module {
         )
     }
 
-    // Database
-    single { get<com.alexcemen.cryptoportfolio.data.db.AppDatabase>().portfolioDao() }
-
     // Repositories
     singleOf(::SettingsRepositoryImpl) bind SettingsRepository::class
-    singleOf(::PortfolioRepositoryImpl) bind PortfolioRepository::class
     singleOf(::CmcRepositoryImpl) bind CmcRepository::class
     singleOf(::MexcRepositoryImpl) bind MexcRepository::class
 

@@ -4,11 +4,15 @@ import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.alexcemen.cryptoportfolio.data.db.AppDatabase
+import com.alexcemen.cryptoportfolio.data.repository.PortfolioRepositoryImpl
+import com.alexcemen.cryptoportfolio.domain.repository.PortfolioRepository
 import com.alexcemen.cryptoportfolio.platform.PlatformContext
 import com.alexcemen.cryptoportfolio.platform.SecureStorage
 import com.alexcemen.cryptoportfolio.platform.getDatabaseBuilder
 import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -26,4 +30,6 @@ val androidModule = module {
             .setQueryCoroutineContext(Dispatchers.IO)
             .build()
     }
+    single { get<AppDatabase>().portfolioDao() }
+    singleOf(::PortfolioRepositoryImpl) bind PortfolioRepository::class
 }

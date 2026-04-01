@@ -8,12 +8,15 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
+expect fun cmcBaseUrl(): String
+expect fun mexcBaseUrl(): String
+
 fun createCmcHttpClient(): HttpClient = HttpClient {
     install(ContentNegotiation) {
         json(Json { ignoreUnknownKeys = true })
     }
     install(Logging) { level = LogLevel.INFO }
-    defaultRequest { url("https://pro-api.coinmarketcap.com/") }
+    defaultRequest { url(cmcBaseUrl()) }
 }
 
 fun createMexcHttpClient(): HttpClient = HttpClient {
@@ -21,5 +24,5 @@ fun createMexcHttpClient(): HttpClient = HttpClient {
         json(Json { ignoreUnknownKeys = true })
     }
     install(Logging) { level = LogLevel.INFO }
-    defaultRequest { url("https://api.mexc.com/") }
+    defaultRequest { url(mexcBaseUrl()) }
 }

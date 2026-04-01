@@ -42,9 +42,6 @@ kotlin {
             implementation(libs.ktor.serialization.json)
             implementation(libs.ktor.client.logging)
 
-            implementation(libs.room.runtime)
-            implementation(libs.sqlite.bundled)
-
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor)
 
@@ -57,16 +54,31 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
 
-        androidMain.dependencies {
-            implementation(libs.ktor.client.okhttp)
-            implementation(libs.koin.android)
-            implementation(libs.security.crypto)
-            implementation(libs.kotlinx.coroutines.android)
-            implementation(libs.androidx.activity.compose)
+        // Intermediate source set for Android + iOS (Room-capable targets)
+        val mobileMain by creating {
+            dependsOn(commonMain.get())
+            dependencies {
+                implementation(libs.room.runtime)
+                implementation(libs.sqlite.bundled)
+            }
         }
 
-        iosMain.dependencies {
-            implementation(libs.ktor.client.darwin)
+        androidMain {
+            dependsOn(mobileMain)
+            dependencies {
+                implementation(libs.ktor.client.okhttp)
+                implementation(libs.koin.android)
+                implementation(libs.security.crypto)
+                implementation(libs.kotlinx.coroutines.android)
+                implementation(libs.androidx.activity.compose)
+            }
+        }
+
+        iosMain {
+            dependsOn(mobileMain)
+            dependencies {
+                implementation(libs.ktor.client.darwin)
+            }
         }
 
         val wasmJsMain by getting {

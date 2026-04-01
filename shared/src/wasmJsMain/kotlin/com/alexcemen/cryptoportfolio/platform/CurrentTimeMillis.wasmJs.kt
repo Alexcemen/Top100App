@@ -1,5 +1,6 @@
 package com.alexcemen.cryptoportfolio.platform
 
-import kotlin.js.Date
+@OptIn(kotlin.js.ExperimentalWasmJsInterop::class)
+private fun dateNow(): Double = js("Date.now()")
 
-actual fun currentTimeMillis(): Long = Date.now().toLong()
+actual fun currentTimeMillis(): Long = dateNow().toLong()

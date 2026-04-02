@@ -4,14 +4,11 @@ import com.alexcemen.cryptoportfolio.data.network.dto.MexcAccountResponse
 import com.alexcemen.cryptoportfolio.data.network.dto.MexcExchangeInfoResponse
 import com.alexcemen.cryptoportfolio.data.network.dto.MexcTickerPriceDto
 import io.ktor.client.HttpClient
-import com.alexcemen.cryptoportfolio.platform.Logger
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
-import io.ktor.client.statement.bodyAsText
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
 class MexcApiService(
@@ -19,14 +16,11 @@ class MexcApiService(
     private val apiKeyProvider: suspend () -> String,
 ) {
     suspend fun getAccount(timestamp: Long, signature: String): MexcAccountResponse {
-        val response = client.get("api/v3/account") {
+        return client.get("api/v3/account") {
             header("X-MEXC-APIKEY", apiKeyProvider())
             parameter("timestamp", timestamp)
             parameter("signature", signature)
-        }
-        val text = response.bodyAsText()
-        Logger.d("MexcApi", "getAccount status=${response.status} body=${text.take(500)}")
-        return Json { ignoreUnknownKeys = true }.decodeFromString(text)
+        }.body()
     }
 
     suspend fun getExchangeInfo(): MexcExchangeInfoResponse {

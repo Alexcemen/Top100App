@@ -41,7 +41,7 @@ private fun sha256(input: ByteArray): ByteArray {
     var h0 = 0x6a09e667
     var h1 = -0x4498517b
     var h2 = 0x3c6ef372
-    var h3 = -0x5a0f7a4c
+    var h3 = -0x5ab00ac6
     var h4 = 0x510e527f
     var h5 = -0x64fa9774
     var h6 = 0x1f83d9ab
